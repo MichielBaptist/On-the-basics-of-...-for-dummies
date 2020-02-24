@@ -1,0 +1,57 @@
+\documentclass{book}
+\author{Michiel Baptist}
+\title{On The Basics Of ... For Dummies}
+
+
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+
+\newcommand{\this}{NONE}
+\newcommand{\base}{chapters}
+\newcommand{\figDir}{\base/\this/fig}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\der}[1]{\frac{d}{d #1}}
+\newcommand{\ID}{\mathbbm{1}}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Compl}{\mathbb{C}}
+\newcommand{\Det}[1]{
+	\begin{vmatrix}
+		#1\\
+	\end{vmatrix}
+}
+\newcommand{\hVec}[1]{
+	\begin{pmatrix}
+		#1
+	\end{pmatrix}
+}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[chapter] % reset theorem numbering for each chapter
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{exmp}{Example} % same for example numbers
+
+
+\begin{document}
+	\maketitle
+	Introduction goes here:
+		- Book by me for me
+		- Book of derivations, theory, usefullness
+		- Fill in as I go
+		- ...
+	\tableofcontents
+	\input{\base/definitions/definitions.tex}
+	\input{\base/PCA/PCA.tex}
+	\input{\base/HMM_EM/EM_for_HMM.tex}
+	
+\end{document}

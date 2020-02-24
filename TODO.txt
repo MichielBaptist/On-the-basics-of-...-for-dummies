@@ -1,0 +1,11 @@
+TODO:
+    - Clean chapters on PCA and HMM
+    - Include introduction
+    - Extend defenitions
+    - Start notation
+    - Chapter on MLN's
+    - Chapter on Bayesian networks
+    - Chapter on SVM's
+    - Chapter on Linear regression (maybe)
+    - Chapter on Bayesian statistics
+    - 

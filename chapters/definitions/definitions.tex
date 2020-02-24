@@ -1,0 +1,32 @@
+\chapter*{Definitions and notation}
+
+In this section I present an overview of the mathematical notation I employ and some of the more common definitions. Whenever a definition is mentioned in the text, this chapter is referred.
+
+\section*{Notation}
+
+\section*{Commonly used definitions}
+
+Humans usually like to compare things to each other. Which apple is riper, juicier and generally better looking? Do I procrastinate, do I try to be productive? Often one or several criteria are compared. Color of the apple, size of the apple, and so on. In mathematics, humans have implemented a very similar notion upon objects such as vectors and matrices. This notion is called a \textit{norm}. It's definition is rather simple, but elegant:
+
+\begin{defn} [Mathematical norm]
+Given a vector space $V$ in over a field in $\Real$ or $\Compl$. A norm $\norm{.}$ is a function $\norm{.}:V \mapsto \Real$ such that $\forall v, u \in V$:
+\begin{enumerate}
+\item $\norm{v} \geq 0$
+\item $\norm{v + u} \leq \norm{v} + \norm{u}$
+\item $\norm{av} = |a|\norm{v}$ $\forall a \in \Real$
+\item $\norm{v} = 0 \Leftrightarrow v = 0$
+\end{enumerate}
+Condition 2 is called the triangle inequality. Note that the definition of norm might allow many definitions. Not only the norms such as the euclidean norm (p-norm) for example.
+\end{defn}
+
+\begin{defn}[The $\mathcal{L}_p$ norm or the p-norm]
+The $\mathcal{L}_p$ norm or p-norm $\norm{.}_p$ is defined over $n$ dimensional vector spaces. It is given by:
+\begin{equation}
+\norm{x}_p = \bigg( \sum_{i=1}^{n} |x_i|^p \bigg)^\frac{1}{p}
+\end{equation}
+
+\end{defn}
+These types of norms are most commonly used in statistics and mathematics.
+\begin{defn}[Frobenius norm]
+
+\end{defn}
