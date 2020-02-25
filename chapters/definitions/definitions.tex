@@ -24,9 +24,14 @@ The $\mathcal{L}_p$ norm or p-norm $\norm{.}_p$ is defined over $n$ dimensional 
 \begin{equation}
 \norm{x}_p = \bigg( \sum_{i=1}^{n} |x_i|^p \bigg)^\frac{1}{p}
 \end{equation}
-
 \end{defn}
 These types of norms are most commonly used in statistics and mathematics.
 \begin{defn}[Frobenius norm]
-
+The frobenius norm is defined over $m\times n$ matrices $X \in \Real^{m \times n}$. It is the natural extension of the 2-norm for vectors. It is defined as: 
+\begin{equation}
+\begin{split}
+\norm{X}_F &= \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n}|x_{ij}|^2}\\
+&= \sqrt{trace(X^TX)} \\
+\end{split}
+\end{equation}
 \end{defn}

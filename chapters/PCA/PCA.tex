@@ -22,57 +22,133 @@
 		\end{figure}\\
 		A whole range of practical problems can be written as a matrix factorization problems. Often we can gain a lot of insights based on decompositions.
 \\\\
-In the previous example, the matrix $X$ was a $m \times n$ matrix. It was decomposed into $m \times k$ and $k \times n$ matrices. Naturally, $A$ and $B$ share a dimension such that their product is defined. In matrix factorization problems this is almost always the case. This $k$ can be chosen differently based on the problem you are dealing with. For example, if one wants to decompose a matrix without losing any information at all, one chooses $k = \min(m, n)$. It is not always desirable to decompose a given matrix, without losing information. In most cases one is interested in smaller $k$ values. Be it for reducing dimension, easier understanding of the decomposition, memory considerations or computation time.
-\\\\
+In the previous example, the matrix $X$ was a $m \times n$ matrix. 
+It was decomposed into $m \times k$ and $k \times n$ matrices. 
+Naturally, $A$ and $B$ share a dimension such that their product
+is defined. In matrix factorization problems this is almost always
+the case. This $k$ can be chosen differently based on the problem 
+you are dealing with. For example, if one wants to decompose a 
+matrix without losing any information at all, one chooses 
+$k = \min(m, n)$. It is not always desirable to decompose a 
+given matrix, without losing information. In most cases one is
+interested in smaller $k$ values. Be it for reducing dimension, 
+easier understanding of the decomposition, memory and time 
+considerations.
 
-Of course since we are dealing with approximations of the data matrix we would like some kind of validation of our approximation. This could for example be done using the minimal Frobenius norm:
-		\begin{defn}
-			The frobenius norm of a matrix $A$ is defined as square root of the sum of all its entries squared.
-			\begin{equation}
-			\norm{A}_F = \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n}|a_{ij}|^2}
-			\end{equation}
-		\end{defn}
-		Using the Frobenius norm the objective function of an approximation would become something like:
-			\begin{equation}
-			min_{A,B} \norm{X -A\cdot B}_F = min_{A,B} \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n}|a_{ij}|^2}
-			\end{equation}
-		This approximation method allows us to place constraints on the matrix factors. One might want to place certain constraints such as sparsity.
-		
-	\section{Dimension reduction}
-		We first look at "dimension reduction" where we try to take our very high dimensional data $\{x_i \in \Real^m\}$ and find a representation of the data points in a lower dimensional (vector)space as an approximation. Of course the most important question that arises now is \textit{How do we find this vector space that can best approximate all data points $x_i$}?
-		\begin{exmp}
-			As an example we could look at an approximation of a face:
-			\begin{figure}[h!]
-				\centering
-				\includegraphics[scale=0.5]{\figDir/face_ex.PNG}
-			\end{figure}\\
-			Here we reduces the dimension of the data from the amount of pixels to only a set of 4 vectors with fixed pixel values.
-		\end{exmp}
-		\section{Linear case in $\Real^m$}
-		We first look at the linear case and try to build up our way from there. In the linear case we will try to reduce data by representing it as a point on a line in some space $\Real^m$.
-		\subsection{Lines, minimizing distance and projection}
-			One way to define a line is as follows:
-			\begin{defn}
-				\begin{equation}
-				a + \Real b \equiv \{x \in \Real^m | \exists z \in \Real \text{ s.t. } x = a + zb\}
-				\end{equation}
-				$a$ is sometimes referred to as the offset and $b$ is sometimes referred to as the direction of the line.
-			\end{defn}
+\section{Frobenius norm as a closeness metric}
+When using a $k$ value smaller than $\min(m, n)$, we lose 
+information when decomposing matrix $X \Real^{m\times n}$.
+The decomposition then becomes an approximation $X \approx AB$
+As we don't want to lose too much information, we need a 
+measure of how \textit{close} two matrices are. 
+One of the ways we can measure this is using the frobenius norm:
+\begin{equation}
+	d(A, B) = \norm{A - B}_F
+\end{equation}
+Assume again, we wish to find a matrix decomposition of $X$ where 
+$k$ is small, so we lose information, the decomposition is
+an approximation. We would then measure how good this approximation
+is using the frobenius norm:
+\begin{equation}
+	d(X,AB) = \norm{X - AB}_F
+\end{equation}
+Transforming this into a minimization objective:
+\begin{equation}
+	\underset{A,B}{\min}\norm{X - AB}_F
+\end{equation}
+	
+\section{PCA as dimension reduction}
+PCA is primarily a technique to \textit{reduce the dimension} of 
+a given data set $X$. Assume there are $n$ data points
+of dimension $m$, i.e.
+$\mathcal{X} = \{x_i| x_i \in \Real^m, i \in \{1\dots n\}\}$.
+Conveniently, this can be encapsulated as a matrix 
+$X \in \Real^{n \times n}$. We can then decompose the 
+matrix as before into $A \in \Real^{m \times k}$ and 
+$B \in \Real^{k \times n}$. Assume now that $k$ is 
+significantly smaller $\min(m,n)$. Instead of having 
+$\mathcal{O}(mn)$ values we now only have $\mathcal{O}(k(m+n))$
+values. For a large $m$ this is significant. The above
+was an example of dimension reduction. PCA is an example of 
+such a dimension reduction techniques. Even more, it is 
+one of the most used techniques out there for reducing dimension.
+
+\begin{exmp}
+As an example we could look at an approximation of a face using PCA.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{\figDir/face_ex.PNG}
+\end{figure}\\
+The dimension of the original data points is the 
+exact amount of pixels in the image. Perhaps the amount
+of pixels is unmanageable. In this example, the faces were
+are reconstructed using $k=4$ images. Thus, instead of 
+considering each data point as a collection of pixels,
+we reduced the dimension of the data by considering each data 
+point as a combination of $4$ base images. We have reduced 
+the dimension of the data to $4$. Of course, in order 
+to re-construct the original images, the $4$ base images 
+are required.
+\end{exmp}
+
+\section{Reducing data to a single value}
+In order to see what PCA does exactly, we will first
+consider what would happen if we reduced the $m$ dimensional
+data to a single value. Hopefully, this value will contain 
+the most information as possible. In essence we are looking 
+at what would happen as $k = 1$. In order to reduce each data 
+point to a single value, many approaches exist. Take for example
+the approach where we simply take the euclidean norm of each point.
+In this case, we capture some information but we lose a lot
+of information. To see why consider $(0, 1)$ and $(1, 0)$.
+They are perpendicular, yet $\norm{(0,1)} = \norm{(1,0)}$.
+\\\\
+There are better ways. We could for instance reduce the points
+by projecting them onto a single line. This is actually the first
+and only step in PCA. By iterating this exact step we obtain
+the PCA decomposition. We start by projecting onto a single line.
+
+\subsection{Lines, minimizing distance and projection}
+Before we project onto it, we need to define exactly what 
+is meant with a line in the $\Real^m$ space.
+One way to define a line is as follows:
+
+\begin{defn}
+\begin{equation}
+a + \Real b \equiv \{x \in \Real^m | 
+\exists z \in \Real \text{ s.t. } x = a + zb\}
+\end{equation}
+Here, $a$ is sometimes referred to as the offset or intercept
+and $b$ is sometimes referred to as the direction of the line.
+\end{defn}
 			
-			\begin{figure}[h!]
-				\centering
-				\begin{tikzpicture}[scale = 0.5]
-				\draw[->] (-1,0) -- (5,0);
-				\draw[->] (0,-1) -- (0,5);
-				\draw[->, red, thick] (0,0) -- node[xshift = 1.5ex](lab){a}(1,2);
-				\draw[->, blue, thick] (1,2) -- node[xshift = 1.5ex](lab){b}(2,1);
-				\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
-				\end{tikzpicture}
-				\label{fig:line}
-				\caption{Visual of a line}
-			\end{figure}
-			Figure \ref{fig:line} gives an intuitive idea of what a line in $\Real^2$ looks like.
-			Often we want the direction to have unit length, that is: $\norm{b}_2 = 1$. Say we want to reduce data to a single line, we need a specific objective (i.e. a specific function that defines how good the line/reduction to the line is). We can achieve this by using e.g. the squared euclidean distance. Intuitively you would think that your data point should be quite close to the chosen point on the line. This is exactly what the euclidean distance defines, how close our reduced point is to the actual data point. We define how \textit{good} the reduction is to the single line (using euclidean distance as measure) as follows:
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale = 0.5]
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	\draw[->, red, thick] (0,0) -- node[xshift = 1.5ex](lab){a}(1,2);
+	\draw[->, blue, thick] (1,2) -- node[xshift = 1.5ex](lab){b}(2,1);
+	\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
+	\end{tikzpicture}
+	\label{fig:line}
+	\caption{Visual of a line}
+\end{figure}
+
+Figure \ref{fig:line} gives an intuitive idea of 
+what a line in $\Real^2$ looks like. Often we want the 
+direction to have unit length, that is: $\norm{b}_2 = 1$. 
+Say we want to reduce data to a single line, we need a 
+specific objective (i.e. a specific function that defines 
+how good the line/reduction to the line is). We can achieve
+this by using e.g. the squared euclidean distance. 
+Intuitively you would think that your data point should be 
+quite close to the chosen point on the line. This is exactly 
+what the euclidean distance defines, how close our reduced 
+point is to the actual data point. We define how \textit{good}
+the reduction is to the single line (using euclidean 
+distance as measure) as follows:
+
 			\begin{equation}
 				\underset{z\in\Real}{\text{arg min}} \norm{a + bz - x}^2
 			\end{equation}
