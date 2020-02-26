@@ -18,6 +18,9 @@
 \newcommand{\base}{chapters}
 \newcommand{\figDir}{\base/\this/fig}
 
+\newcommand*{\vertbar}{\rule[-1ex]{0.5pt}{2.5ex}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\der}[1]{\frac{d}{d #1}}
 \newcommand{\ID}{\mathbbm{1}}
@@ -33,6 +36,11 @@
 		#1
 	\end{pmatrix}
 }
+\newcommand{\pd}[1]{\frac{\partial}{\partial #1}}
+
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}[chapter] % reset theorem numbering for each chapter
@@ -40,6 +48,7 @@
 \theoremstyle{definition}
 \newtheorem{defn}{Definition} % definition numbers are dependent on theorem numbers
 \newtheorem{exmp}{Example} % same for example numbers
+\newtheorem{prop}{Property}
 
 
 \begin{document}
@@ -50,8 +59,8 @@
 		- Fill in as I go
 		- ...
 	\tableofcontents
-	\input{\base/definitions/definitions.tex}
-	\input{\base/PCA/PCA.tex}
-	\input{\base/HMM_EM/EM_for_HMM.tex}
+	\input{chapters/definitions/definitions.tex}
+	\input{chapters/PCA/PCA.tex}
+	\input{chapters/HMM_EM/EM_for_HMM.tex}
 	
 \end{document}

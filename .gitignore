@@ -1,1 +1,4 @@
 *.log
+*.gz
+commit.m
+TODO.txt

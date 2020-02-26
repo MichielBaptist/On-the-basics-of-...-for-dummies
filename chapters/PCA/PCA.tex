@@ -1,26 +1,48 @@
 \renewcommand{\this}{PCA}
 
 \chapter{Principle Component Analysis (PCA)}
-	\section{Matrix factorization as a tool}
-		The core concept of principle component analysis is making use of matrix factorization techniques. These techniques, as the name implies, decompose a matrix of interest $X \in \Real^{m \times n}$ into several matrices such that their product equals $X$. For example, an approximation of the data matrix $X$ could be given by the product of $A \in \Real^{m \times k}$ and $B \in \Real^{k \times n}$:\\
-		\begin{figure}[h!]
-			\centering	
-			\begin{tikzpicture}
-			\draw (0,0) node[shape=rectangle, draw=black, minimum width = 40, minimum height = 30](x){$X$};
-			\draw node[below of = x] (times) {$m \times n$};
+\section{Matrix factorization as a tool}
+The core concept of principle component analysis is 
+making use of matrix factorization techniques. These 
+techniques, as the name implies, decompose a matrix 
+of interest $X \in \Real^{m \times n}$ into several 
+matrices such that their product equals $X$. For 
+example, an approximation of the data matrix $X$ 
+could be given by the product of 
+$A \in \Real^{m \times k}$ and $B \in \Real^{k \times n}$:
+\\
+\begin{figure}[h!]
+	\centering	
+	\begin{tikzpicture}
+	\draw (0,0) node[shape=rectangle, 
+					 draw=black, 
+					 minimum width = 40, 
+					 minimum height = 30](x){$X$};
+	\draw node[below of = x] (times) {$m \times n$};
+	\draw node[right of = x, xshift = 2ex] (apr){$\approx$};
 			
-			\draw node[right of = x, xshift = 2ex] (apr){$\approx$};
+	\draw node[right of = apr, 
+			   shape=rectangle, 
+			   draw=black, 
+			   minimum width = 20, 
+			   minimum height = 30](A){$A$};
+			   
+	\draw node[below of = A] (times) {$m \times k$};
 			
-			\draw node[right of = apr, shape=rectangle, draw=black, minimum width = 20, minimum height = 30](A){$A$};
-			\draw node[below of = A] (times) {$m \times k$};
-			
-			\draw node[right of = A, shape=rectangle, draw=black, minimum width = 40, minimum height = 20, xshift = 2ex](B){$B$};
-			\draw node[below of = B] (times) {$k \times n$};
-			\end{tikzpicture}
-			\label{approx}
-			\caption{Example of factorization.}
-		\end{figure}\\
-		A whole range of practical problems can be written as a matrix factorization problems. Often we can gain a lot of insights based on decompositions.
+	\draw node[right of = A, 
+			   shape=rectangle, 
+			   draw=black, 
+			   minimum width = 40, 
+			   minimum height = 20, 
+			   xshift = 2ex](B){$B$};
+	\draw node[below of = B] (times) {$k \times n$};
+	\end{tikzpicture}
+	\label{approx}
+	\caption{Example of factorization.}
+\end{figure}\\
+A whole range of practical problems can be written
+as a matrix factorization problems. Often we can 
+gain a lot of insights based on decompositions.
 \\\\
 In the previous example, the matrix $X$ was a $m \times n$ matrix. 
 It was decomposed into $m \times k$ and $k \times n$ matrices. 
@@ -36,6 +58,7 @@ easier understanding of the decomposition, memory and time
 considerations.
 
 \section{Frobenius norm as a closeness metric}
+\label{sec:frobenius}
 When using a $k$ value smaller than $\min(m, n)$, we lose 
 information when decomposing matrix $X \Real^{m\times n}$.
 The decomposition then becomes an approximation $X \approx AB$
@@ -108,7 +131,7 @@ by projecting them onto a single line. This is actually the first
 and only step in PCA. By iterating this exact step we obtain
 the PCA decomposition. We start by projecting onto a single line.
 
-\subsection{Lines, minimizing distance and projection}
+\subsection{Projecting a single data point onto a fixed line}
 Before we project onto it, we need to define exactly what 
 is meant with a line in the $\Real^m$ space.
 One way to define a line is as follows:
@@ -137,276 +160,393 @@ and $b$ is sometimes referred to as the direction of the line.
 
 Figure \ref{fig:line} gives an intuitive idea of 
 what a line in $\Real^2$ looks like. Often we want the 
-direction to have unit length, that is: $\norm{b}_2 = 1$. 
-Say we want to reduce data to a single line, we need a 
-specific objective (i.e. a specific function that defines 
-how good the line/reduction to the line is). We can achieve
-this by using e.g. the squared euclidean distance. 
-Intuitively you would think that your data point should be 
-quite close to the chosen point on the line. This is exactly 
-what the euclidean distance defines, how close our reduced 
-point is to the actual data point. We define how \textit{good}
-the reduction is to the single line (using euclidean 
-distance as measure) as follows:
+direction to have unit length. Mathematically this means: 
+$\norm{b}_2 = 1$.
+\\\\
+Say we want to project a point $x$ onto a single line. There are
+infinite ways to do this. However, if one wants to keep
+as much of the information contained in the original 
+point, we need to define an objective function.
+Ideally, this objective function defines how distant the
+projected point and the original point are. This concept 
+should sound familiar. Just as in section \ref{sec:frobenius},
+we defined the Frobenius norm as a metric to measure how
+distance two matrices are. As the Frobenius norm is the 
+natural extension of the $\mathcal{L}^2$ norm. Let's use 
+the $\mathcal{L}^2$ norm to measure distance between
+two points.
+\\\\
+We know that the projected point is somewhere on the line
+we are projecting to. Let's call this point $a + bz$, we know
+our line is fixed. This means $a$ and $b$ are fixed. Thus, the projected
+point is completely defined by $z$. The squared euclidean
+distance between the two points is then defined as:
+\begin{equation}
+\label{eq:eucl_proj}
+\underset{z\in\Real}{\text{arg min}} \norm{a + bz - x}^2
+\end{equation}
 
-			\begin{equation}
-				\underset{z\in\Real}{\text{arg min}} \norm{a + bz - x}^2
-			\end{equation}
-			Figure \ref{fig:sq} shows an intuitive picture of the \textbf{non squared} euclidean distance.
-			\begin{figure}[h!]
-				\centering
-				\begin{tikzpicture}[scale = 0.5]
-					\draw[->] (-1,0) -- (5,0);
-					\draw[->] (0,-1) -- (0,5);
+Figure \ref{fig:sq} shows an intuitive picture of 
+the \textbf{non squared} euclidean distance. There are
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale = 0.5]
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
 					
-					\draw (4,2) circle (0.1cm);
+	\draw (4,2) circle (0.1cm);
 					
-					\draw[->, red, thick] (0,0) -- node[xshift = 1.5ex](lab){a}(1,2);
-					\draw[->, blue, thick] (1,2) -- node[xshift = 1.5ex](lab){b}(2,1);
-					\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
+	\draw[->, red, thick] (0,0) -- node[xshift = 1.5ex](lab){a}(1,2);
+	\draw[->, blue, thick] (1,2) -- node[xshift = 1.5ex](lab){b}(2,1);
+	\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
 					
-					\draw[dashed] (4,2) -- (2.5,0.45);
-					\draw[dashed] (4,2) -- node[yshift = 1ex] {$z_1$} (-0.5,3.5);
-					\draw[dashed] (4,2) -- node[xshift = 1ex] {$z_3$}(4,-1);
-				\end{tikzpicture}
-				\caption{Visual of distance to a line for varying $z$ values}
-				\label{fig:sq}
-			\end{figure}\\
-			It is clear to see that using this criteria that we reach the minimal value of $\norm{\cdot}$ when $z$ is chosen such that we project orthogonally onto the line as in figure \ref{fig:sq}. Mathematically we can derive this as where the (convex) loss is minimal:
-			\begin{equation}
-			\label{eq:sol_z}
-				\begin{split}
-					\der{z}\norm{a + bz - x}^2 &= 2(a +bz - x)^T b = 0 \\
-					  &=(a-x)^T b + \underbrace{b^Tb }_{\norm{b}^2 = 1}z = 0\\
-					z &=-(a-x)^Tb
-				\end{split}
-			\end{equation}
-			This comfirms our belief of the orthogonal projection, since we are projecting onto the $b$ direction. To understand exactely what's happening we can see in figure \ref{fig:proj}, the green arrow ($x-a$) is being projected onto $b$ to find the optimal $z$.
-			\pagebreak
+	\draw[dashed] (4,2) -- (2.5,0.45);
+	\draw[dashed] (4,2) -- node[yshift = 1ex] {$z_1$} (-0.5,3.5);
+	\draw[dashed] (4,2) -- node[xshift = 1ex] {$z_3$}(4,-1);
+	\end{tikzpicture}
+	\caption{Visual of distance to a line for varying $z$ values}
+	\label{fig:sq}
+\end{figure}\\
+
+It is clear to see that using the squared euclidean distance 
+that we reach the optimal point on the line by projecting the
+original point orthagonally onto the line. 
+Mathematically we can find this by deriving the squared
+euclidean distance in equation \ref{eq:eucl_proj} for $z$.
+\begin{equation}
+\label{eq:sol_z}
+\begin{split}
+\der{z}\norm{a + bz - x}^2 &= 2(a +bz - x)^T b = 0 \\
+&=(a-x)^T b + \underbrace{b^Tb }_{\norm{b}^2 = 1}z = 0\\
+z &=-(a-x)^Tb
+\end{split}
+\end{equation}
+This confirms our belief that the orthogonal projection 
+does indeed minimize the distance between the original 
+data point and the projected data point. We see this 
+since we are projecting onto the $b$ direction.
+\\\\
+To understand 
+exactly what's happening we can have a look at figure
+\ref{fig:proj}. Here, the green arrow ($x-a$) is being 
+projected onto $b$ to find the optimal $z$.
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale = 0.5]
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](a) at (1,2) ;
+	\coordinate[](b) at (2,1) ;
+	\coordinate[](x) at (4,2) ;
+	
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	
+	\draw (x) circle (0.1cm);
+	
+	\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
+	\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
+	\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
+	
+	\draw[thick, green, ->] (a)--(x);
+	\draw[dashed] (4,2) -- (2.5,0.45);
+	\end{tikzpicture}
+	\caption{Visual of optimal $z$ value as a 
+	projection of $(x-a)$ onto the direction.}
+	\label{fig:proj}
+\end{figure}
+Now that we found the $z$ value that minimizes the 
+loss (the projection onto the $b$ direction), let's look 
+at what this means mathematically:
+\begin{equation}
+\label{eq:x_prime}
+x' = a + (x-a)^Tbb
+\end{equation} 
+To better visualize this result, we can have a look at
+figure \ref{fig:recon}.
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale = 0.5]
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](a) at (1,2) ;
+	\coordinate[](b) at (2,1) ;
+	\coordinate[](x) at (4,2) ;
+	
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	
+	\draw (x) circle (0.1cm);
+	
+	\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
+	\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
+	\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
+	
+	\draw[thick, green, ->] (a)--node[yshift = 1ex]{$x-a$}(x);
+	\draw[dashed] (4,2) -- (2.5,0.45);
+	\draw[black, ->, thick] (origin) 
+		--node[xshift = -6ex] {$(x-a)^Tb$} (1.3,-1.3);
+	\end{tikzpicture}
+	\begin{tikzpicture}[scale = 0.5]
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](a) at (1,2) ;
+	\coordinate[](b) at (2,1) ;
+	\coordinate[](x) at (4,2) ;
+	
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	
+	\draw (x) circle (0.1cm);
+	
+	\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
+	\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
+	\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
+	\draw[black, ->, thick] (origin) 
+			--node[xshift = -6ex] {$(x-a)^Tb$} (1.3,-1.3);
+	
+	\draw[dashed, ->, bend right = 45, purple]
+		(1,-1)to node[xshift = 1ex]{$+a$}(2.2,0.8);
 			
-			\begin{figure}[h!]
-				\centering
-				\begin{tikzpicture}[scale = 0.5]
-					\coordinate[](origin) at (0,0) ;
-					\coordinate[](a) at (1,2) ;
-					\coordinate[](b) at (2,1) ;
-					\coordinate[](x) at (4,2) ;
-					
-					\draw[->] (-1,0) -- (5,0);
-					\draw[->] (0,-1) -- (0,5);
-					
-					\draw (x) circle (0.1cm);
-					
-					\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
-					\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
-					\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
-					
-					\draw[thick, green, ->] (a)--(x);
-					\draw[dashed] (4,2) -- (2.5,0.45);
-				\end{tikzpicture}
-				\caption{Visual of optimal $z$ value as a projection of $(x-a)$ onto the direction.}
-				\label{fig:proj}
-			\end{figure}
-			Now that we found the $z$ value that minimizes the loss (the projection onto the direction) let's look at what this means visually when we plug in the optimal $z$ into $a + bz$:
-			\begin{figure}[h!]
-				\centering
-				\begin{tikzpicture}[scale = 0.5]
-					\coordinate[](origin) at (0,0) ;
-					\coordinate[](a) at (1,2) ;
-					\coordinate[](b) at (2,1) ;
-					\coordinate[](x) at (4,2) ;
-					
-					\draw[->] (-1,0) -- (5,0);
-					\draw[->] (0,-1) -- (0,5);
-					
-					\draw (x) circle (0.1cm);
-					
-					\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
-					\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
-					\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
-					
-					\draw[thick, green, ->] (a)--node[yshift = 1ex]{$x-a$}(x);
-					\draw[dashed] (4,2) -- (2.5,0.45);
-					\draw[black, ->, thick] (origin) --node[xshift = -6ex] {$(x-a)^Tb$} (1.3,-1.3);
-				\end{tikzpicture}
-				$\Rightarrow$
-				\begin{tikzpicture}[scale = 0.5]
-					\coordinate[](origin) at (0,0) ;
-					\coordinate[](a) at (1,2) ;
-					\coordinate[](b) at (2,1) ;
-					\coordinate[](x) at (4,2) ;
-					
-					\draw[->] (-1,0) -- (5,0);
-					\draw[->] (0,-1) -- (0,5);
-					
-					\draw (x) circle (0.1cm);
-					
-					\draw[->, red, thick] (origin) -- node[xshift = 1.5ex](lab){a}(a);
-					\draw[->, blue, thick] (a) -- node[xshift = 1.5ex](lab){b}(b);
-					\draw[blue, dashed] (-1,4) -- node[xshift = 1.5ex](lab){b}(4,-1);
-					\draw[black, ->, thick] (origin) --node[xshift = -6ex] {$(x-a)^Tb$} (1.3,-1.3);
-					
-					\draw[dashed, ->, bend right = 45, purple](1,-1)to node[xshift = 1ex]{$+a$}(2.2,0.8);
-				\end{tikzpicture}
-				\caption{Visual of optimal $z$ value plugged back in to find the optimal point again.}
-				\label{fig:recon}
-			\end{figure}\\
-			Mathematically of course this means nothing else than the following:
-			We can clearly see 4 steps in this process of finding the optimal value and "plugging it back in":
-			\begin{enumerate}
-				\item shift $x$ towords the bias $a$ by taking the difference: $x-a$
-				\item projection onto the $b$ direction: $(x-a)^Tb$
-				\item Multiply in the $b$ direction: $(x-a)^Tbb$
-				\item Shifting back to the bias: $(x-a)^Tbb + a$
-			\end{enumerate}
+	\end{tikzpicture}
+	\caption{Visual of optimal $z$ value 
+			plugged back in to find the optimal point again.}
+	\label{fig:recon}
+\end{figure}
+Mathematically, the story being told by equation \ref{eq:x_prime} is
+quite logical. We can see 4 steps:
+\begin{enumerate}
+	\item Remove the intercept from $x$: $x-a$
+	\item Project orthagonally onto $b$: $(x-a)^Tb$
+	\item Multiply in the $b$ direction: $(x-a)^Tbb$
+	\item Add back the intercept: $(x-a)^Tbb + a$
+\end{enumerate}
+So by minimizing the euclidean distance from a point
+to a line we find the orthogonal projection. This will
+be used extensively in the next few sections.
+
+\subsection{Optimal line through multiple data points}
+We've seen how to optimally project a single data 
+point to a fixed line, minimizing euclidean distance.
+We now look at what happens when we have more than a single
+data point. Additionally, we don't consider the line $a + b\Real$
+to be fixed. Instead, we turn the exercise upside down. We
+want to answer the question: \textit{what would be the optimal
+line through our data points, such that when we project all points
+orthagonally, we keep as much information as possible?} In line
+with the previous sections, we measure \textit{information} loss
+using the euclidean distance.
+\\\\
+Mathematically, we wish to answer the following.
+Consider $n$ data points $\{x_1,...,x_n\}$ where $x_i \in \Real^m$.
+How do we find the optimal line considering the mean 
+squared euclidean loss:
+\begin{equation}
+\label{eq:loss_ab}
+L(a,b) = \frac{1}{n}\sum_{i=1}^{n}\norm{a + bz_i - x_i}
+\end{equation}
+Additionally we will consider $\norm{b} = 1$, $b$ is a unit 
+length vector. This property will become important.
+From previous the previous section, we already know that the optimal
+$z_i$ for each individual data point in known to be 
+$z_i = (x_i-a)^Tbb$. Due to the fact that one projection
+of a data point does not interfere with another, we can simply
+replace $z_i$ in equation \ref{eq:loss_ab}.
+\\\\
+Minimizing over $a$ and $b$ and using previous 
+results of equation (\ref{eq:sol_z}) we find:
+
+\begin{equation}
+\label{eq:loss}
+\begin{split}
+\argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}\norm{a + bz_i - x_i}^2 &=
+\argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}\norm{a + b(x_i - a)^Tb - x_i}^2
+\\
+&= \argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}
+		\norm{bb^T(x_i - a) + (a - x_i)}^2 \\
+&= \argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}
+		\norm{bb^T(x_i - a) - (x_i - a)}^2 \\
+&= \argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}
+		\norm{(bb^T - \ID_{m})(x_i - a)}^2 \\
+\end{split}
+\end{equation}
+Note that the $\norm{\cdot}$ operation is an even 
+function so \ref{eq:loss} can be written equivalently
+as (we can change the sign in the brackets 
+$\norm{-a} = \norm{a}$):
+\begin{equation}
+\argmin_{a, b}\frac{1}{n}\sum_{i=1}^{n}\norm{(\ID - bb^T)(x_i - a)}^2 \\
+\end{equation}
+Now what exactly does the $(\ID_m - bb^T)$ transformation mean?
+Transforming a vector $v$ out we obtain:
+\begin{equation}
+(\ID_m - bb^T)v = v - b(b^Tv)
+\end{equation}
+Reminding ourselves that $b$ is a unit vector, we can see it
+is exactly the vector we obtain when taking the difference
+between an original vector $v$ and the projection of the vector
+$b(b^Tv)$. Unsurprisingly of course, as that is exactly what we 
+started with.
+\\\\
+A nice thing about $(\ID - bb^T)$ is that it is idempotent.
+We can show that this is clearly the case:
+\begin{equation}
+\label{eq:idempot}
+\begin{split}
+	(\ID -bb^T)(\ID - bb^t) &= \ID\ID - 2bb^T 
+			+ b\underbrace{b^Tb}_{b^Tb = \norm{b}}b^T\\
+&= \ID - bb^T\\
+\end{split}
+\end{equation}\\
+
+\subsection{Optimal value for $a$}
+Now let's get back to finding the optimal line for given data. 
+The first order optimality condition states that the gradient
+with respect to $a$ and $b$ should vanish when optimal.
+Taking the gradient with respect to $a$ 
+of equation \ref{eq:loss} we find the following:
+\begin{equation}
+\label{eq:grad_Lin_loss_1}
+\begin{split}
+\nabla_a L(a,b) &=  \frac{1}{n}\sum_{i=1}^{n}
+	\nabla_a\norm{(\ID - bb^T)(x_i - a)}^2 \\
+&= \frac{-2}{n}\sum_{i=1}^{n}
+	(\ID - bb^T)^T(\ID - bb^T)(x_i - a) \\
+&= \frac{-2}{n}(\ID - bb^T)^T
+	(\ID - bb^T)\sum_{i=1}^{n}(x_i - a) \\
+\end{split}
+\end{equation}
+In the second line we used the fact that $\nabla_x \norm{Ax}^2 = 2AxA^T$,
+which was proven in the definitions section.
+We now know that since $(\ID - bb^T)$ is clearly symmetric 
+($A^T = A$) and we know that the matrix is idempotent from 
+(\ref{eq:idempot}), thus we can write 
+(\ref{eq:grad_Lin_loss_1}) follows:
+\begin{equation}
+\label{eq:grad_Lin_loss_2}
+\begin{split}					
+	\nabla_a L(a,b) = (\ID - bb^T)\sum_{i=1}^{n}(x_i - a) &= 0\\
+	(\ID - bb^T)\sum_{i=1}^{n}(x_i) &= (\ID - bb^T)\sum_{i=1}^{n}(a)\\
+	(\ID - bb^T)\frac{1}{n}\sum_{i=1}^{n}(x_i) &= (\ID - bb^T)a\\
+\end{split}
+\end{equation}
+From (\ref{eq:grad_Lin_loss_2}) we can see that the 
+optimality condition is met when $a = \frac{1}{n}\sum_{i=1}^{n}x_i$.
+This means that the optimal line will always pass through 
+the average of all the data points. Figure \ref{fig:avg} 
+shows this visually:\\
+\begin{figure}[h!]
+	\centering				
+	\begin{tikzpicture}[scale=0.8]
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](x1) at (4,3) ;
+	\coordinate[](x2) at (1,2.5) ;
+	\coordinate[](x3) at (2,0.5);
+	\coordinate[blue](av) at (2.3333333, 2);
+	
+	\draw (x1) circle (0.1);
+	\draw (x2) circle (0.1);
+	\draw (x3) circle (0.1);
+	\draw[blue, thick, fill = blue] (av) 
+			circle (0.05) node[xshift = 2ex]{$\bar{x}$};
+	
+	\draw[dashed, red] (origin) -- (4.666,4) node[]{$l_1$};
+	\draw[dashed, red] (-1,2) -- (5, 2) node[]{$l_2$};
+	\draw[dashed, red] (0,4.3333) -- (5,-0.66666) node[]{$l_3$};
+	
+	\draw[dotted] (av)--(x1) node[xshift = 2ex]{$x_1$};
+	\draw[dotted] (av)--(x2) node[xshift = -2ex]{$x_2$};
+	\draw[dotted] (av)--(x3) node[xshift = -2ex]{$x_3$};
+	
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	\end{tikzpicture}
+	\caption{Visualisation of lines going 
+		through average of data points $x_i$.}
+\label{fig:avg}
+\end{figure}\\
+Figure \ref{fig:avg} shows us visually something quite
+interesting, since we know that the optimal line passes 
+through the average $\bar{x}$ we could try to make the 
+origin itself the average. We could achieve this by 
+subtracting the average from every data point as shown 
+in figure \ref{fig:subavg}. This step is very often done
+as a pre-processing step. It makes derivations easier 
+analytically. When "data is centered", this simply means 
+that the empirical mean $\frac{1}{n}\sum_{i=1}^{n}x_i$ 
+has already been subtracted and that the new mean is the origin.
 			
-			\subsection{Finding optimal line through first order optimality conditions}
-			So now we could also wonder the following: \textit{How do we choose the $a$ and $b$ such that we minimize some loss function?}. Consider again $n$ data points $\{x_1,...,x_n\}$ where $x_i \in \Real^m$. For example, how do we find the optimal line considering the euclidean squared loss:
-			\begin{equation}
-				L(a,b) = \frac{1}{n}\sum_{i=1}^{n}\norm{a + bz_i - x_i}
-			\end{equation}
-			Minimizing over $a,b,z_i$ and using previous results of equation (\ref{eq:sol_z}) we find:
-			
-			\begin{equation}
-			\label{eq:loss}
-				\begin{split}
-					\underset{a,b,z_i}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{a + bz_i - x_i}^2 &= \underset{a,b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{a + b(x_i - a)^Tb - x_i}^2\\
-					&= \underset{a,b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{bb^T(x_i - a) + (a - x_i)}^2 \\
-					&= \underset{a,b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{(bb^T - \ID)(x_i - a)}^2 \\
-				\end{split}
-			\end{equation}
-			Note that the $\norm{\cdot}$ operation is an even function so \ref{eq:loss} can be written equivalently as (we can change the sign in the brackets $\norm{-a} = \norm{a}$):
-			\begin{equation}
-				\underset{a,b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{(\ID - bb^T)(x_i - a)}^2 \\
-			\end{equation}
-			Now what exactly does this equation mean? If we look at a general vector $v$:
-			
-			\begin{figure}[h!]
-				\centering
-				\begin{tabular}{c|c}
-					$(\ID - bb^t)v = v - b(b^Tv)$
-					&
-					\begin{tikzpicture}[scale = 0.5]
-					\coordinate[](origin) at (0,0) ;
-					\coordinate[](v) at (2,3) ;
-					\coordinate[](b) at (3,-1) ;
+\begin{figure}[h!]
+	\centering				
+	\begin{tikzpicture}[scale=0.8]
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](x1) at (4,3) ;
+	\coordinate[](x2) at (1,2.5) ;
+	\coordinate[](x3) at (2,0.5);
+	\coordinate[blue](av) at (2.3333333, 2);
+	
+	\draw (x1) circle (0.1);
+	\draw (x2) circle (0.1);
+	\draw (x3) circle (0.1);
+	\draw[blue, thick, fill = blue] (av) 
+			circle (0.05) node[xshift = 2ex]{$\bar{x}$};
+	
+	\draw[dotted] (av)--(x1) node[xshift = 2ex]{$x_1$};
+	\draw[dotted] (av)--(x2) node[xshift = -2ex]{$x_2$};
+	\draw[dotted] (av)--(x3) node[xshift = -2ex]{$x_3$};
+	
+	\draw[thick, red, ->] (av) -- (origin);
+	\draw[thick, red, ->] (x1) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_1'$};
+	\draw[thick, red, ->] (x2) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_2'$};
+	\draw[thick, red, ->] (x3) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_3'$};
 					
-					\draw[->] (-1,0) -- (5,0);
-					\draw[->] (0,-1) -- (0,5);
-					
-					\draw[->, thick, red] (origin)--node[xshift=-1ex]{$v$}(v);
-					\draw[->, thick, green] (origin)-- node[yshift=1ex]{$b$}(b);
-					\draw[->, thick, purple] (origin) --node[yshift=-2ex]{$b(b^Tv)$}(2,-0.666666666);
-					\draw[->, thick, blue](2,-0.6666666666) --node[xshift = 6ex]{$v-b(b^Tv)$} (v);
-					
-					\draw[dashed] (b)--(0.4,0.6);
-					\end{tikzpicture}
-				\end{tabular}
-				\caption{Visualisation of $(\ID - bb^T)v$}
-			\end{figure}
-			Another nice thing about $(\ID - bb^T)$ is that it is idempotent. A matrix $A$ is idempotent when $A^n = A$. We can show that this is clearly the case:
-			\begin{equation}
-				\label{eq:idempot}
-				\begin{split}
-					(\ID -bb^T)(\ID - bb^t) &= \ID\ID - 2bb^T + b\underbrace{b^Tb}_{bb^T = \norm{b}}b^T\\
-					&= \ID - bb^T\\
-				\end{split}
-			\end{equation}\\
-			\subsection{Optimal value for $a$}
-			Now let's get back to finding the optimal line for the given data. The first order optimality condition (i.e. setting gradient w.r.t. $a$ to 0 and finding extremum value) of (\ref{eq:loss}) can be found as follows:
-			\begin{equation}
-				\label{eq:grad_Lin_loss_1}
-				\begin{split}
-					\nabla_a L(a,b) = \frac{-2}{n}(\ID - bb^T)^T(\ID - bb^T)\sum_{i=1}^{n}(x_i - a) &= 0
-				\end{split}
-			\end{equation}
-			We now know that since $(\ID - bb^T)$ is clearly symmetric ($A^T = A$) and we know that the matrix is idempotent from (\ref{eq:idempot}), thus we can write (\ref{eq:grad_Lin_loss_1}) follows:
-			\begin{equation}
-				\label{eq:grad_Lin_loss_2}
-				\begin{split}					
-					\nabla_a L(a,b) = (\ID - bb^T)\sum_{i=1}^{n}(x_i - a) &= 0\\
-					(\ID - bb^T)\sum_{i=1}^{n}(x_i) &= (\ID - bb^T)\sum_{i=1}^{n}(a)\\
-					(\ID - bb^T)\frac{1}{n}\sum_{i=1}^{n}(x_i) &= (\ID - bb^T)a\\
-				\end{split}
-			\end{equation}
-			From (\ref{eq:grad_Lin_loss_2}) we can see that the optimality condition is met when $a = \frac{1}{n}\sum_{i=1}^{n}x_i$. This means that the optimal line will always pass through the average of all the data points. Figure \ref{fig:avg} shows this visually:\\
-			\begin{figure}[h!]
-				\centering				
-				\begin{tikzpicture}[scale=0.8]
-				\coordinate[](origin) at (0,0) ;
-				\coordinate[](x1) at (4,3) ;
-				\coordinate[](x2) at (1,2.5) ;
-				\coordinate[](x3) at (2,0.5);
-				\coordinate[blue](av) at (2.3333333, 2);
-				
-				\draw (x1) circle (0.1);
-				\draw (x2) circle (0.1);
-				\draw (x3) circle (0.1);
-				\draw[blue, thick, fill = blue] (av) circle (0.05) node[xshift = 2ex]{$\bar{x}$};
-				
-				\draw[dashed, red] (origin) -- (4.666,4) node[]{$l_1$};
-				\draw[dashed, red] (-1,2) -- (5, 2) node[]{$l_2$};
-				\draw[dashed, red] (0,4.3333) -- (5,-0.66666) node[]{$l_3$};
-				
-				\draw[dotted] (av)--(x1) node[xshift = 2ex]{$x_1$};
-				\draw[dotted] (av)--(x2) node[xshift = -2ex]{$x_2$};
-				\draw[dotted] (av)--(x3) node[xshift = -2ex]{$x_3$};
-				
-				\draw[->] (-1,0) -- (5,0);
-				\draw[->] (0,-1) -- (0,5);
-				\end{tikzpicture}
-				\caption{Visualisation of lines going through average of data points $x_i$.}
-				\label{fig:avg}
-			\end{figure}\\
-			The above figure shows us visually something quite interesting, since we know that the optimal line passes through the average $\bar{x}$ we could try to make the origin itself the average. We could achive this by substracting the average from every data point as in figure \ref{fig:subavg} below. This step is very often done as a preprocessing step. It makes derivations easier analytically. When "data is centered", this simply means that the emperical mean $\frac{1}{n}\sum_{i=1}^{n}x_i$ has already been substracted and that the new mean is the origin.
-			
-			\begin{figure}[h!]
-				\centering				
-				\begin{tikzpicture}[scale=0.8]
-				\coordinate[](origin) at (0,0) ;
-				\coordinate[](x1) at (4,3) ;
-				\coordinate[](x2) at (1,2.5) ;
-				\coordinate[](x3) at (2,0.5);
-				\coordinate[blue](av) at (2.3333333, 2);
-				
-				\draw (x1) circle (0.1);
-				\draw (x2) circle (0.1);
-				\draw (x3) circle (0.1);
-				\draw[blue, thick, fill = blue] (av) circle (0.05) node[xshift = 2ex]{$\bar{x}$};
-				
-				\draw[dotted] (av)--(x1) node[xshift = 2ex]{$x_1$};
-				\draw[dotted] (av)--(x2) node[xshift = -2ex]{$x_2$};
-				\draw[dotted] (av)--(x3) node[xshift = -2ex]{$x_3$};
-				
-				\draw[thick, red, ->] (av) -- (origin);
-				\draw[thick, red, ->] (x1) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_1'$};
-				\draw[thick, red, ->] (x2) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_2'$};
-				\draw[thick, red, ->] (x3) -- ++(-2.33333,-2)node[xshift = -2ex]{$x_3'$};
-								
-				\draw[->] (-1,0) -- (5,0);
-				\draw[->] (0,-1) -- (0,5);
-				\end{tikzpicture}
-				\caption{Visualisation of substracting mean of points from $x_i$.}
-				\label{fig:subavg}
-			\end{figure}
-			\pagebreak
-			\subsection{Optimal value for $b$ as principal eigenvectors}
-			As figure \ref{fig:avg} suggests, this of course leaves the question of \textit{How do we choose the direction of the optimal line?} Now we assume that the data is centered, this means that $a$ in $a+bz$ is assumed to be $0$. If we then look at the euclidean loss function as in (\ref{eq:loss}), but assume no offset we obtain:
-			\begin{equation}
-				\begin{split}
-					b&\in\underset{b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{x_i^Tbb - x_i}^2 \\
-					b&\in\underset{b}{argmin}\frac{1}{n}\sum_{i=1}^{n}\norm{x_i^Tbb}^2 +\sum_{i=1}^{n} \norm{x_i}^2 - 2\sum_{i=1}^{n} (x_i^Tbb)^Tx_i \\
-				\end{split}		
-				\label{eq:loss_decomposed}		
-			\end{equation}
-			If we look at $\norm{x_i^Tbb}^2 = (x_i^Tbb)^Tx_i^Tbb = (x_i^Tb)\underbrace{b^Tb}_{=1}b^Tx_i = \norm{x_i^Tb}^2$ and it's clear to see that $(x_i^Tbb)^Tx_i = (x_i^Tb)b^Tx_i = \norm{x_i^Tb}^2$. Aditionally since $\norm{x_i}^2$ is constant it can be left out from (\ref{eq:loss_decomposed}), resulting in:
-			\begin{equation}
-				\begin{split}
-					b&\in\underset{b,\norm{b}=1}{argmin}\frac{-1}{n}\sum_{i=1}^{n} \norm{x_i^Tb}^2 \\
-					b&\in\underset{b,\norm{b}=1}{argmax}\frac{1}{n}\sum_{i=1}^{n} \norm{x_i^Tb}^2 \\
-				\end{split}			
-			\end{equation}
-			Now we have simplified what we want to maximize(minimize), let's see what exactly is going on. We can take the mathematical route for this:
+	\draw[->] (-1,0) -- (5,0);
+	\draw[->] (0,-1) -- (0,5);
+	\end{tikzpicture}
+	\caption{Visualisation of substracting mean of points from $x_i$.}
+	\label{fig:subavg}
+\end{figure}
+
+\subsection{Optimal value for $b$ as principal eigenvectors}
+As figure \ref{fig:avg} suggests, this of course leaves 
+the question of \textit{How do we choose the direction of the optimal line?}
+From now, we will assume the data is centered, this means that
+$a$ in $a+bz$ is assumed to be $0$. If we then look at the 
+euclidean loss function as in (\ref{eq:loss}), 
+where $a=0$:
+\begin{equation}
+	\begin{split}
+	L(b) &= \frac{1}{n}
+		\sum_{i=1}^{n}\norm{x_i^Tbb - x_i}^2 \\
+	L(b) &= \frac{1}{n}\Bigg(
+		\sum_{i=1}^{n}\norm{x_i^Tbb}^2 +
+		\sum_{i=1}^{n} \norm{x_i}^2 - 
+		2\sum_{i=1}^{n} (x_i^Tbb)^Tx_i \Bigg)\\
+	\end{split}		
+	\label{eq:loss_decomposed}		
+\end{equation}
+Rewriting $\norm{x_i^Tbb}^2$ we find:
+\begin{equation}
+\norm{x_i^Tbb}^2 = (x_i^Tbb)^Tx_i^Tbb = (x_i^Tb)\underbrace{b^Tb}_{=1}b^Tx_i = \norm{x_i^Tb}^2
+\end{equation}
+Further observing that $(x_i^Tbb)^Tx_i = (x_i^Tb)b^Tx_i = \norm{x_i^Tb}^2$,
+leaves us with the re-written loss function from equation
+\ref{eq:loss_decomposed}:
+\begin{equation}
+\begin{split}
+L(b) = \frac{1}{n}\Bigg(
+	-\sum_{i=1}^{n}\norm{x_i^Tbb}^2 +
+	\sum_{i=1}^{n} \norm{x_i}^2\Bigg)\\
+\end{split}	
+\end{equation}
+Aditionally since $\norm{x_i}^2$ is constant it can be 
+left out from (\ref{eq:loss_decomposed}), when minimizing
+for $b$. This results in:
+\begin{equation}
+\begin{split}
+	L(b) = \frac{-1}{n}\sum_{i=1}^{n} \norm{x_i^Tb}^2 \\
+\end{split}			
+\end{equation}
+Now we have simplified what we want to minimize, let's 
+see what exactly is going on. Let's take the mathematical
+route for now:
 			\begin{equation}
 			\label{eq:sample_var}
 				\begin{split}

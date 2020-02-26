@@ -1,37 +1,199 @@
 \chapter*{Definitions and notation}
 
-In this section I present an overview of the mathematical notation I employ and some of the more common definitions. Whenever a definition is mentioned in the text, this chapter is referred.
+In this section I present an overview of the mathematical 
+notation I employ and some of the more common definitions.
+Each definition comes with a little intuition, or at least
+a view into my own way of thinking about the respective 
+definitions. Whenever a definition is mentioned in the text,
+this chapter is referred to.
 
 \section*{Notation}
 
 \section*{Commonly used definitions}
 
-Humans usually like to compare things to each other. Which apple is riper, juicier and generally better looking? Do I procrastinate, do I try to be productive? Often one or several criteria are compared. Color of the apple, size of the apple, and so on. In mathematics, humans have implemented a very similar notion upon objects such as vectors and matrices. This notion is called a \textit{norm}. It's definition is rather simple, but elegant:
+\subsection*{1. Norms}
+Humans usually like to compare things to each other.
+Which apple is riper, juicier and generally better looking?
+Do I procrastinate, do I try to be productive? Often one or 
+several criteria are compared. Color of the apple, size of 
+the apple, and so on. In mathematics, humans have implemented 
+a very similar notion upon objects such as vectors and matrices. 
+This notion is called a \textit{norm}. It's definition is 
+rather simple, but elegant:
 
 \begin{defn} [Mathematical norm]
-Given a vector space $V$ in over a field in $\Real$ or $\Compl$. A norm $\norm{.}$ is a function $\norm{.}:V \mapsto \Real$ such that $\forall v, u \in V$:
+Given a vector space $V$ in over a field in $\Real$ or 
+$\Compl$. A norm $\norm{.}$ is a function 
+$\norm{.}:V \mapsto \Real$ such that $\forall v, u \in V$:
+
 \begin{enumerate}
 \item $\norm{v} \geq 0$
 \item $\norm{v + u} \leq \norm{v} + \norm{u}$
 \item $\norm{av} = |a|\norm{v}$ $\forall a \in \Real$
 \item $\norm{v} = 0 \Leftrightarrow v = 0$
 \end{enumerate}
-Condition 2 is called the triangle inequality. Note that the definition of norm might allow many definitions. Not only the norms such as the euclidean norm (p-norm) for example.
-\end{defn}
 
-\begin{defn}[The $\mathcal{L}_p$ norm or the p-norm]
-The $\mathcal{L}_p$ norm or p-norm $\norm{.}_p$ is defined over $n$ dimensional vector spaces. It is given by:
+Condition 2 is called the triangle inequality. Note that
+the definition of norm might allow many definitions. 
+Not only the norms such as the euclidean norm (p-norm) for example.
+\end{defn}
+\begin{defn}[The $\mathcal{L}^p$ norm or the p-norm]
+The $\mathcal{L}^p$ norm or p-norm $\norm{.}_p$ is 
+defined over $n$ dimensional vector spaces. It is given by:
 \begin{equation}
 \norm{x}_p = \bigg( \sum_{i=1}^{n} |x_i|^p \bigg)^\frac{1}{p}
 \end{equation}
 \end{defn}
-These types of norms are most commonly used in statistics and mathematics.
+These types of norms are most commonly used in 
+statistics and mathematics. The \textit{Euclidean} norm is
+simply the $\mathcal{L}^2$ norm. The $\mathcal{L}^1$ norm is
+usually referred to as the taxicab norm or the 
+Manhattan norm. To see why consider taking a taxi to point
+$(2,3)$ in the plane and the driver is only allowed to drive
+horizontally and vertically. The taxicab norm is then
+simply the total amount of driven distance.
+\\\\
+So far we described norms in terms of $1 \times m$ 
+dimensional vectors. The concept of a norm for matrices is 
+somewhat less intuitive. However, some matrix norms are.
+Take for example the Frobenius norm, it is the natural extension
+of the $\mathcal{L}^2$ norm for vectors.
 \begin{defn}[Frobenius norm]
-The frobenius norm is defined over $m\times n$ matrices $X \in \Real^{m \times n}$. It is the natural extension of the 2-norm for vectors. It is defined as: 
+The frobenius norm is defined over $m\times n$ 
+matrices $X \in \Real^{m \times n}$. It is the 
+natural extension of the 2-norm for vectors. It is defined as: 
 \begin{equation}
+\label{eq:def_frobenius}
 \begin{split}
 \norm{X}_F &= \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n}|x_{ij}|^2}\\
 &= \sqrt{trace(X^TX)} \\
 \end{split}
 \end{equation}
 \end{defn}
+To see why the second line in equation \ref{eq:def_frobenius}
+holds, let's write out $trace(X^TX)$.
+\begin{equation}
+\begin{split}
+trace(X^TX) &= trace
+\begin{pmatrix}
+\horzbar & x_1 & \horzbar\\
+ & \vdots & \\
+\horzbar & x_n & \horzbar\\
+\end{pmatrix}
+\begin{pmatrix}
+\vertbar & & \vertbar\\
+ x_1 & \hdots & x_n \\
+\vertbar & & \vertbar\\
+\end{pmatrix}\\
+&= trace
+\begin{pmatrix}
+x_1^Tx_1 & & &\\
+& x_2^Tx_2 & &\\
+& & & \ddots &\\
+& & & & x_n^Tx_n\\
+\end{pmatrix}\\
+&= \sum_{i = 1}^{n} x_i^Tx_i\\
+&= \sum_{i = 1}^{n} \bigg( \sum_{j=1}^{m} x_{ij}^2 \bigg)
+\end{split}
+\end{equation}
+
+\section*{Matrix properties}
+\begin{defn}[Idempotent matrix]
+A matrix $A$ is idempotent iff $AA = A$.
+\end{defn}
+
+\section*{Matrix derivatives}
+
+\begin{prop}
+$\nabla_x \norm{x}^2 = 2x$
+\end{prop}
+\begin{proof}
+We find the partial derivative for $x_i$:
+\begin{equation}
+\begin{split}
+\frac{\partial}{\partial x_i} \norm{x}^2 &= 
+	\frac{\partial}{\partial x_i} x^Tx \\
+&= \frac{\partial}{\partial x_i} \sum_{j=1}^{m} x_j^2 \\
+&= 2x_i
+\end{split}
+\end{equation}
+The gradient is defined as:
+\begin{equation}
+\nabla_x f(x)= 
+\begin{pmatrix}
+\frac{\partial}{\partial x_1} f(x)\\
+\vdots \\
+\frac{\partial}{\partial x_m} f(x)\\
+\end{pmatrix}
+=2
+\begin{pmatrix}
+x_1\\
+\vdots \\
+x_m
+\end{pmatrix}
+\end{equation}
+\end{proof}
+
+\begin{prop}
+$\nabla_x \norm{Ax}^2 = 2A^TAx = 2(Ax)^TA$ 
+\end{prop}
+
+\begin{proof}
+\label{sec:gradient_squared_norm}
+This proof is long and winded. However, it gives you intuition.
+In the following, $a_i$ is the $i$'th row of $A$. $a_{.k}$
+is by extension the $k$'th column of $A$.
+Let's begin by taking a partial derivative for $x_i$:
+\begin{equation}
+\begin{split}
+\pd{x_k} \norm{Ax}^2 
+&= \pd{x_k} \Bigg\langle 
+\begin{pmatrix}
+a_1x \\
+\vdots \\
+a_mx
+\end{pmatrix},
+\begin{pmatrix}
+a_1x \\
+\vdots \\
+a_mx \\
+\end{pmatrix} \Bigg\rangle \\
+&= \pd{x_k}\sum_{i=1}^{m} (a_ix)^2 \\
+&= \pd{x_k}\sum_{i=1}^{m} \Big(\sum_{j=1}^{m} a_{ij}x_j\Big)^2 \\
+&= 2\sum_{i=1}^{m}\Big(\sum_{j=1}^{m} a_{ij}x_j \Big) \pd{x_k} 
+		\Big(\sum_{j=1}^{m} a_{ij}x_j \Big)\\
+&= 2\sum_{i=1}^{m}\Big(\sum_{j=1}^{m} a_{ij}x_j \Big) a_{ik} \\
+&= 2\sum_{i=1}^{m}(a_ix)a_{ik}
+\end{split}
+\end{equation}
+In the above equation $(a_ix)$ is the $i$'th element of $Ax$.
+Since $i$ is going from $1 \rightarrow m$ we see in the last line
+that we are multiplying $Ax$ by the $k$'th column of $A$.
+We rewrite as follows:
+\begin{equation}
+\pd{x_i} \norm{Ax}^2 = 2(Ax)^TA_{.k}
+\end{equation}
+The gradient is defined as:
+\begin{equation}
+\begin{split}
+\nabla_x f(x)&= 
+\begin{pmatrix}
+\frac{\partial}{\partial x_1} f(x)\\
+\vdots \\
+\frac{\partial}{\partial x_m} f(x)\\
+\end{pmatrix}
+=2
+\begin{pmatrix}
+(Ax)^TA_{.1}\\
+\vdots \\
+(Ax)^TA_{.m} \\
+\end{pmatrix} \\
+&= 2(Ax)^T\begin{pmatrix}
+A_{.1} &
+\hdots &
+A_{.m}
+\end{pmatrix} \\
+&= 2 (Ax)^T A
+\end{split}
+\end{equation}
+\end{proof}
