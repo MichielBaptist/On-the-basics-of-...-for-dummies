@@ -548,311 +548,487 @@ for $b$. This results in:
 Now we have simplified what we want to minimize, let's 
 see what exactly is going on. Let's take the mathematical
 route for now:
-			\begin{equation}
-			\label{eq:sample_var}
-				\begin{split}
-					b&\in\underset{b,\norm{b}=1}{argmax}\frac{1}{n}\sum_{i=1}^{n} \norm{x_i^Tb}^2 \\
-					b&\in\underset{b,\norm{b}=1}{argmax}\frac{1}{n}\sum_{i=1}^{n} (x_i^Tb)^T(x_i^Tb) \\
-					b&\in\underset{b,\norm{b}=1}{argmax } b^T\Big(\frac{1}{n}\sum_{i=1}^{n} x_ix_i^T\Big)b \\					
-					b&\in\underset{b,\norm{b}=1}{argmax } b^T \Sigma b \\
-				\end{split}			
-			\end{equation}
-			In (\ref{eq:sample_var}) we find that $\Sigma = \frac{1}{n}\sum_{i=1}^{n} x_ix_i^T$ is simply a (biased) empirical estimate of the covariance matrix! \\\\
-			\textbf{Intermezzo:}This matrix can also be written as $\frac{1}{n}X^TX$, where $X = (x_1,...,x_n)^T$. To visualize this better:\\
-			\begin{equation}
-				\sum_{i=1}^{n}
-				\begin{bmatrix}
-					x_{i,1}^2 & x_{i,2}x_{i,1} & \dots & x_{i,m}x_{i,1}\\
-					x_{i,2}x_{i,1} & x_{i,2}^2 & \dots & x_{i,m}x_{i,2}\\
-					\vdots & & \ddots & \vdots\\
-					x_{i,m}x_{i,1}& x_{i,m}x_{i,2}& \dots & x_{i,m}^2\\
-				\end{bmatrix} = 
-				\begin{bmatrix}
-					\sum_{i=1}^{n}x_{i,1}^2 & \sum_{i=1}^{n}x_{i,2}x_{i,1} & \dots & \sum_{i=1}^{n}x_{i,m}x_{i,1}\\
-					\sum_{i=1}^{n}x_{i,2}x_{i,1} & \sum_{i=1}^{n}x_{i,2}^2 & \dots & \sum_{i=1}^{n}x_{i,m}x_{i,2}\\
-					\vdots & & \ddots & \vdots\\
-					\sum_{i=1}^{n}x_{i,m}x_{i,1}& \sum_{i=1}^{n}x_{i,m}x_{i,2}& \dots & \sum_{i=1}^{n}x_{i,m}^2\\
-				\end{bmatrix}
-			\end{equation}
-			Now let's look at an entry in this matrix, it is the sum of all data points of the product of the $j$'th and $i$'th component. Then considering this we can intuitively see the following:
-			\begin{equation}
-				\begin{bmatrix}
-				x_{1,1}& \dots & x_{n,1}\\
-				\vdots & & \vdots\\
-				x_{1,m} & \dots & x_{n,m}\\
-				\end{bmatrix}
-				\begin{bmatrix}
-				x_{1,1} & \dots & x_{1,m}\\
-				\vdots & & \vdots\\
-				 & & \\
-				x_{n,1} & \dots & x_{n,m}\\
-				\end{bmatrix}
-			\end{equation}
-			The rows consist of the $i$'th component of every point, so multiplying this with every column we find exactely the $\Sigma$ matrix.\\
-			\textbf{End of intermezzo}\\\\
-			 Let's now try to minimize this (constrained) objective, we can use a lagrange multiplier to "turn it into" an unconstrained problem as follows:
-			\begin{equation}
-				\label{eq:lagrange}
-				\begin{split}
-					\mathcal{L}(b,\lambda) = b^T\Sigma b + \lambda\norm{b}^2
-				\end{split}			
-			\end{equation}
-			Finding the extremal value of (\ref{eq:lagrange}) we derive for $b$ and equal the gradient to 0, as usual:
-			\begin{equation}
-				\begin{split}
-					\nabla_b\mathcal{L}(b,\lambda) = (2\Sigma b - 2\lambda b) &= 0\\
-					\Sigma b &= \lambda b
-				\end{split}			
-			\end{equation}
-			So we have derived that the optimal $b$ is actually an eigen vector of the $\Sigma$ matrix. Since we are maximizing over $b$, we find the maximum by taking the eigenvector with the highest possible eigenvalue. To see exactly why this is the case we look again at the lagrangian in (\ref{eq:lagrange}) and "plug in" the optimality condition and we use the fact that $\norm{b}=1$. Then it's easy to that $\mathcal{L}(b,\lambda) = \lambda \underbrace{b^Tb}_{=1} + \lambda\norm{b}^2$ and since we are maximizing $\lambda$ should be as big as possible. The eigenvector that has the highest eigenvalue is called the \textbf{principal} eigenvector or $\Sigma$.
-		\subsection{Optimal value of $b$ as projected data variance.}
-		We saw that the optimal direction is actually just the principal eigenvector of the $\Sigma$ matrix. Let's look again what it means to maximize the $b^T\Sigma b$ objective, this time however we take another approach to interpret what we're doing. From (\ref{eq:sample_var}) we know that:
-		\begin{equation}
-			b^T\Sigma b = \frac{1}{n}\sum_{i=1}^{n}\norm{x_i^Tb}^2 = \frac{1}{n}\sum_{i=1}^{n}z_i^2 = \frac{1}{n}\sum_{i=1}^{n}(z_i - 0)^2
-		\end{equation}
-		Note that this is simply the empirical (biased) variance of the projected data points, since the projected mean is exactly the projection of the origin (centered data) onto the line going through the origin. Thus the projected mean is also $0$. We can thus interpret this as:
-		\begin{equation}
-			b^T\Sigma b = Var[z]
-		\end{equation}
-		So we can either interpret this as finding the prinipal eigenvector of the sample variance matrix or as the maximization of the projected data. Figure \ref{fig:variance_max} below shows this visually:
-		\begin{figure}[h!]
-			\centering
-			\begin{tikzpicture}
-			\coordinate[](origin) at (0,0) ;
-			\coordinate[](x1) at (-2,-2.5) ;
-			\coordinate[](x2) at (-0.1,0.4) ;
-			\coordinate[](x3) at (-0.2,-1.3);
-			\coordinate[](x4) at (1,2);
-			\coordinate[](x5) at (1.7, 1);
-			
-			\draw[](x1)circle (0.05) node[xshift=2ex]{$x_1$};
-			\draw[](x2)circle (0.05) node[xshift=2ex]{$x_2$};
-			\draw[](x3)circle (0.05) node[xshift=2ex]{$x_3$};
-			\draw[](x4)circle (0.05) node[xshift=2ex]{$x_4$};
-			\draw[](x5)circle (0.05) node[xshift=2ex]{$x_5$};
-			
-			\draw[dashed, green](-3,-3)--(3,3);
-			\draw[red](x1)--(-2.25,-2.25) circle (0.05);
-			\draw[red](x2)--(0.15,0.15) circle (0.05);
-			\draw[red](x3)--(-0.75,-0.75) circle (0.05);
-			\draw[red](x4)--(1.5,1.5) circle (0.05);
-			\draw[red](x5)--(1.35,1.35) circle (0.05);
-			
-			\draw[dashed, purple](-3,3)--(3,-3);
-			\draw[blue,thin](x1)--(.25,-.25) circle (0.05);
-			\draw[blue,thin](x2)--(-0.25,0.25) circle (0.05);
-			\draw[blue,thin](x3)--(0.55,-0.55) circle (0.05);
-			\draw[blue,thin](x4)--(-0.5,0.5) circle (0.05);
-			\draw[blue,thin](x5)--(0.35, -0.35) circle (0.05);
-			
-			\draw[->] (-3,0) -- (3,0);
-			\draw[->] (0,-3) -- (0,3);
-			\end{tikzpicture}
-			\caption{Visual of projected variance maximization.}
-		\end{figure}
-		Clearly the pruple line has lower projected variance than the green line. Intuitively the worst case line would project all points onto the same point, losing all inforamation (variance). The best case would maximize the the variance. Variance of the priojections can then be seen as how much information is retained when projecting.
-		\section{Principal Component Analysis(PCA)}
-		We've seen the case of a single line, now we could ask ourselves, \textit{Could we perform another projection to reduce the dimension again?}. Let's take a look at the so called "residual", which is the original data point minus the projected data point:
-		\begin{equation}
-			\label{eq:residual_definition}
-			\begin{split}
-				 r_i := x_i - (a + bz_i) &= x_i - (x_i)^Tbb\\
-				 &=(\ID - bb^T)x_i
-			\end{split}
-		\end{equation}
-		The above result was derived using $x_i^Tbb = bx_i^Tb=bb^Tx_i$. Figure \ref{fig:residual} shows what the redisual looks like, however since there are only $2$ dimensions it's somewhat less clear.
-		\begin{figure}[h!]
-			\centering
-			\begin{tikzpicture}
-			\coordinate[](origin) at (0,0) ;
-			\coordinate[](x1) at (-2,-2.5) ;
-			\coordinate[](x2) at (-0.1,0.4) ;
-			\coordinate[](x3) at (-0.2,-1.3);
-			\coordinate[](x4) at (1,2);
-			\coordinate[](x5) at (1.7, 1);
-			
-			\draw[](x1)circle (0.05) node[xshift=2ex]{$x_1$};
-			\draw[](x2)circle (0.05) node[xshift=2ex]{$x_2$};
-			\draw[](x3)circle (0.05) node[xshift=2ex]{$x_3$};
-			\draw[](x4)circle (0.05) node[xshift=2ex]{$x_4$};
-			\draw[](x5)circle (0.05) node[xshift=2ex]{$x_5$};
-			
-			\draw[dashed, green](-3,-3)--(3,3);
-			\draw[->, red](x1)->(-2.25,-2.25) circle (0.05);
-			\draw[->, red](x2)->(0.15,0.15) circle (0.05);
-			\draw[->, red](x3)->(-0.75,-0.75) circle (0.05);
-			\draw[->, red](x4)->(1.5,1.5) circle (0.05);
-			\draw[->, red](x5)->(1.35,1.35) circle (0.05);
-			
-			\draw[->](origin) -- (0.25,-0.25);
-			\draw[->](origin) -- (-0.25,0.25);
-			\draw[->](origin) -- (0.55,-0.55);
-			\draw[->](origin) -- (-0.5, 0.5);
-			\draw[->](origin) -- (0.35,-0.35);
-			
-			\draw[->] (-3,0) -- (3,0);
-			\draw[->] (0,-3) -- (0,3);
-			\end{tikzpicture}
-			\caption{Visualisation of residuals.}
-			\label{fig:residual}
-		\end{figure}\\
-		\subsection{PCA as an iterative process}
-		What if we again try to project the residual to an optimal line, we simply treat the residuals as our new data? Note that then the analasys to do this is axactly the same case as in previous sections. We also need the fact that the mean of the residuals is again centered since:
-		\begin{equation}
-			\frac{1}{n}\sum_{i=1}^{n}r_i = (\ID - bb^T)\frac{1}{n}\sum_{i=1}^{n}x_i = 0
-		\end{equation}
-		This means that the analysis can be done exactly the same. Like in previous section, minimizing $\sum_{i-1}^{n}\norm{r_i^Tbb - r_i}^2$ for b will result in having to maximize $b^T(\frac{1}{n}\sum_{i=1}^{n}r_ir_i^T)b = b^T\Sigma_rb$ for b. \\\\
-		We could simply find the principal eigenvector of $\Sigma_r $ and do this iteratively, but maybe we could exploit a relationship to make it simpler. So what is the relationship between $\Sigma_r$ and $\Sigma$? We analyse this as follows using (\ref{eq:residual_definition}), the fact that $(\ID - bb^T)$ is idempotent as shown in(\ref{eq:idempot}) and that $\Sigma$ is symmetric:
-		\begin{equation}
-			\begin{split}
-				\frac{1}{n}\sum_{i=1}^{n}r_ir_i^T &= \frac{1}{n}\sum_{i=1}^{n}(\ID - bb^T)x_i((\ID - bb^T)x_i)^T\\
-					&= \frac{1}{n}\sum_{i=1}^{n}(\ID - bb^T)x_ix_i^T(\ID - bb^T)^T\\
-					&= (\ID - bb^T)(\ID - bb^T)\Sigma^T\\	
-					&= \Sigma - b\Sigma b^T\\
-					&= \Sigma - \lambda bb^T			
-			\end{split}
-		\end{equation}
-		We can already notice something immediately, $b$ (the eigenvector of $\Sigma$) is now also an eigenvector of $(\Sigma - \lambda bb^T)$:
-		\begin{equation}
-		(\Sigma - \lambda bb^T)b = \Sigma b - \lambda b = 0\\
-		\end{equation}
-		The reverse is obviously true an eigenvector of $(\Sigma - \lambda bb^T)$ is also an eigenvector of $\Sigma$, it follows from the previous.
-		This $v$ is the principal eigenvector of $(\Sigma - \lambda bb^T)$ (by construction) and the second principle eigenvector of $\Sigma$, by iterating $m$ times we find $d$ pairwise othogonal eigenvectors. Figure \ref{fig:residual} shows visually that using the residuals to find an optimal projection will find maximum projected variance when the line is orthogonal to the green line. Another way to see why they are orthogonal is by noting that $\Sigma$ is positive semi-definite ($\lambda_i > 0$) because it's symmetric so the eigenvectors are orthogonal\footnote{say $x$ and $y$ are eigenvectors with $\lambda_1$ and $\lambda_2$ as eigenvalues of $A$ then $\lambda_1 <x,y> = <Ax,y> = <x,A^Ty> = <x,Ay>=<x,y>\lambda_2$ since $\lambda_1 \neq \lambda_2$ then $<x,y>=0$.}
-		\subsection{PCA as a diagonalization problem}
-		Recall that $\Sigma$ is symmetric so it may be diagonalized into orthogonal matrices:
-		\begin{equation}
-		\Sigma = U\Lambda U^T
-		\end{equation}
-		Where $U=(u_1, u_2, \dots, u_m)$ and $\Lambda = diag(\lambda_1, \dots, \lambda_m)$ note that the eigenvectors are orthogonal so that:
-		\begin{equation}
-			U^Tu_i = \begin{bmatrix}
-			u_1^T\\
-			\vdots\\
-			u_m^T
-			\end{bmatrix}u_i = \begin{bmatrix}
-			u_1^Tu_i\\
-			\vdots\\
-			u_m^Tu_i
-			\end{bmatrix} = \begin{bmatrix}
-			0\\
-			\vdots\\
-			u_i^Tu_i = 1\\
-			\vdots\\
-			0\\
-			\end{bmatrix}=e_i
-		\end{equation}
-		Using this we can clearly see that:
-		\begin{equation}
-		\begin{split}
-			U\Lambda U^T & =\begin{bmatrix}
-			u_1 & \dots & u_m\\
-			\end{bmatrix}
-			\begin{bmatrix}
-			\lambda_1 &\dots & 0\\
-			\vdots&\cdots&\vdots\\
-			0& \dots& \lambda_m\\
-			\end{bmatrix}
-			\begin{bmatrix}
-			u_1 \\ \vdots \\ u_m\\
-			\end{bmatrix}		\\
-			&=\begin{bmatrix}
-			\lambda_1u_1 & \dots & \lambda_mu_m\\
-			\end{bmatrix}\begin{bmatrix}
-			u_1 \\ \vdots \\ u_m\\
-			\end{bmatrix}\\
-			&= \Sigma \underbrace{UU^T}_{\ID} = \Sigma
-		\end{split}
-		\end{equation}
-		\subsection{Colclusion: PCA}
-		Let's recap what we did to find out what PCA is.\\
-		
-		 First we want to reduce our data from higher dimension to lower dimension. We first considered a line of the simple form $a+bz$, to attemt to reduce dimension. We concluded that using the euclidean distance the optimal point (minimal distance) on the line was the point such that if we project $x_i$ onto it.\\
-		 
-		 Second we looked at what the ideal offset $a$ for the euclidean distance given a set of data points $x_i, 1\leq i \leq n$. It of course turned out to be the center of mass $\frac{1}{n}\sum_{i=1}^{n}x_i$. We then decided to shift the entire dataset by substracting the center of mass from every datapoint. This makes analasys way easier.\\
-		 
-		 Third we looked at the optimal direction $b$ of the line and it turned out that the objective funtion was finding the principal eigenvector of the biased empirical variance $\Sigma = \frac{1}{n}\sum_{i=1}^{n}x_ix_i^T$. Another way of looking at it was maximizing the variance of the projected points $x_i$.\\
-		 
-		 Fourth we looked at iterative PCA by again projecting the residuals $r_i = x_i - x_i^Tbb$ on another (orthogonal) line. This was again an eigenvector of $\Sigma$, the construction of can be done iteratively. Another way to look at it was as a diagonalization problem of $\Sigma = U\Lambda U^T$.\\
-		 
-		 Now where is the "reduction" of the data exactly? Well every point can be projected to $d$ principle eigenvectors of $\Sigma$ to give us $U^T x_i = (u_1^Tx_i \dots u_dx_i) = (z_1 \dots z_d)$ this gives us a reduction to the optimal weights for a linear combination of the lower dimensional basis (the $d$ principal eigenvectors). To re-construct the data point we take a linear combination of the $d$ principal eigenvectors. This can be done as $(z_1 \dots z_d)U$. Of course when you pick $d$ to be the dimensionality of the data then there is no reduction but an exact decomposition of the data matrix $X$. So basically:
-		 \begin{itemize}
-		 	\item Reduction: \begin{equation}
-		 	Z = U^T X= \begin{bmatrix}
-		 	u_1\\
-		 	\vdots\\
-		 	u_d\\
-		 	\end{bmatrix}
-		 	\begin{bmatrix}
-		 	x_1&
-		 	\dots&
-		 	x_n\\
-		 	\end{bmatrix} = 
-		 	\begin{bmatrix}
-		 	x_1^Tu_1 & \dots& x_nu_1\\
-		 	\vdots& \cdots & \vdots\\
-		 	x_1u_d & \dots & x_nu_d\\
-		 	\end{bmatrix} = \begin{bmatrix}
-		 	z_{1,1} & \dots& z_{n,1}\\
-		 	\vdots& \cdots & \vdots\\
-		 	z_{1,d} & \dots & z_{n,d}\\
-		 	\end{bmatrix}
-		 	\end{equation}
-		 	we can clearly see that we reduced the data from $\Real^m$ to $\Real^d$. Only if $d < m$ is there really a reduction and is there truly an approximation when reconstructing!
-		 	\item Re-construction:
-		 	\begin{equation}
-		 	\hat{X} = UZ = \begin{bmatrix} 
-		 	\sum_{i=1}^{d}z_{1,i}u_i & \dots & \sum_{i=1}^{d}z_{n,i}u_i \\
-		 	\end{bmatrix}
-		 	\end{equation}
-		 	Here I wrote it out explicitly so it's easy to see that the reduction is just keeping track of weights for the linear combination of the $d$ principal eigenvectors.
-		 \end{itemize}
-	 \section{Practical PCA: Finding pricipal eigenvector}
-	 We've seen a derivation of PCA, one perspective of PCA is iteratively finding pricipal eigenvectors or certain symmetric matrices (empirical biased covariance matrix of the data or residuals). However we "skipped" the part where we actually find the principal eigenvector. One practicle way of finding the principal eigenvector is the power method.
-	 \subsection{Power method: practicle principal eigenvector}
-	 Assume a symmetric matrix $\Sigma$ and we wish to find $u_1$, the principal eigenvector of $\Sigma$. The algorithm goes as follows:
-	 \begin{enumerate}
-	 	\item Initialize $v_0$ a random vector. For simplicity we assume that $\langle u_1,v_0\rangle \not 0$ and that the principal eignenvalue is unique i.e. $|\lambda_1| > |\lambda_j|$.
-	 	\item Iteratively apply the following operation:
-	 \begin{equation}
-		 v_{t+1} = \frac{\Sigma v_t}{\norm{\Sigma v_t}}
-	 \end{equation}
-	 \item It holds that:
-	 \begin{equation}
-		 \lim_{t\rightarrow\infty} v_t = u_1
-	 \end{equation}
-	 \item To find the corresponding eignenvalue:
-	 \begin{equation}
-		 \lambda_1 = \lim_{t\rightarrow\infty} \frac{\norm{\Sigma v_t}}{\norm{v_t}} = \frac{\norm{\Sigma u_1}}{\norm{u_1}} = \frac{\norm{\lambda_1u_1}}{\norm{u_1}} = \lambda_1
-	 \end{equation}
-	\end{enumerate}
-	Why does this algorithm work? We assume $\Sigma$ (as in last section) is p.s.d. and symmetric (true for $XX^T$). In this case the eigenvectors are all orthogonal to each other so they can form a basis for $\Real^m$, this means any $v_0 \in \Real^m$ can be written as a linear combination of eigenvectors
-	\begin{equation}
-	\label{eq:eigenbasis}
-	v_0 = \sum_{i=1}^{m} a_i u_i
-	\end{equation}
-	how does $v_t$ evolve considering this?
-	\begin{equation}
-	\label{eq:evolve_power}
-	v_{t} = \frac{\Sigma^t v_0}{\norm{\Sigma^t v_0}} = \frac{\sum_{i=1}^{m}a_i\Sigma^t u_i}{\norm{\Sigma^t v_0}}
-	\end{equation}
-	Note equation (\ref{eq:evolve_power}) was obtained by recursively finding $v_i$ and using (\ref{eq:eigenbasis}). Since $u_i$ are eigenvectors by assumption we can re-write it as follows by pulling out the highest eigenvalue:
-	\begin{equation}
-	\frac{a_1\lambda_1^tu_1 + \sum_{i=2}^{m}\frac{a_i}{a_1}(\frac{\lambda_i}{\lambda_1})^t u_i}{\norm{\Sigma^t v_0}}
-	\end{equation}
-	To understand the limit as $t\rightarrow\infty$ we clearly see for the numerator:
-	\begin{equation}
-	\lim_{t\rightarrow\infty}a_1\lambda_1^tu_1 + \sum_{i=2}^{m}\frac{a_i}{a_1}(\underbrace{\frac{\lambda_i}{\lambda_1}}_{=0})^t u_i = a_1\lambda_1^tu_1
-	\end{equation}
-	The denomenator can be interpreted in the same way (using $\norm{u_1} = 1$), cancelling the $a_1\lambda_1^t$ resulting in power iteration method converging to $u_1$.
-	\section{Practical PCA: choosing amount of eigenvectors}
-	How many eigenvectors should we "select" or "keep" and how should we select which ones to keep and not keep. Intuitively from previous section which looked at PCA as a variance maximisation of the projected data, we should keep the $k$ eigenvectors which have the highest eigenvalues. It represents how much information is contained within the eigenvector for specific data.\\
+\begin{equation}
+\label{eq:sample_var}
+\begin{split}
+	b&\in\argmin_{b, \norm{b} = 1}
+		\frac{-1}{n}\sum_{i=1}^{n} \norm{x_i^Tb}^2 \\
+	b&\in\argmax_{b, \norm{b} = 1}
+		\frac{1}{n}\sum_{i=1}^{n} (x_i^Tb)^T(x_i^Tb) \\
+	b&\in\argmax_{b, \norm{b} = 1} 
+		b^T\Big(\frac{1}{n}\sum_{i=1}^{n} x_ix_i^T\Big)b \\					
+	b&\in\argmax_{b, \norm{b} = 1}
+		 b^T \Sigma b \\
+\end{split}			
+\end{equation}
+In (\ref{eq:sample_var}) we find that $\Sigma = 
+\frac{1}{n}\sum_{i=1}^{n} x_ix_i^T$ is simply the sample 
+covariance matrix\footnote{Note that we already assumed that
+the data is centered, thus $\Sigma$ can indeed be 
+considered the sample covariance matrix.}!
+We can now try to minimize this constrained objective.
+Note that we assumed that $\norm{b}=1$, 
+we can use a Lagrange multiplier to in order to turn 
+the constrained objective into the unconstrained objective:
+
+\begin{equation}
+\label{eq:lagrange}
+\mathcal{L}(b,\lambda) = b^T\Sigma b + \lambda\norm{b}^2	
+\end{equation}
+Finding the extremal value of (\ref{eq:lagrange}) we
+derive for $b$ and equal the gradient to 0, as usual:
+\begin{equation}
+\label{eq:optimality_cond_b}
+\begin{split}
+\nabla_b\mathcal{L}(b,\lambda) = (2\Sigma b - 2\lambda b) &= 0\\
+\Sigma b &= \lambda b\\
+\end{split}			
+\end{equation}
+So we have derived that the optimal $b$ is actually 
+an eigenvector of the $\Sigma$ matrix. The Lagrange 
+multiplier $\lambda$ is the corresponding eigenvalue.
+The question still remains, \textit{which eigenvector
+will maximize $b^T\Sigma b$?}
+\\\\
+We can maximize $b^TXb$ when $b$ is the eigenvector
+which has the highest eigenvalue. To see exactly why 
+this is the case we look again at the Lagrangian in 
+(\ref{eq:lagrange}) and plug in the optimality 
+condition from equation \ref{eq:optimality_cond_b}:
+\begin{equation}
+\begin{split}
+\mathcal{L}(b,\lambda) 
+&= 
+	\lambda \underbrace{b^Tb}_{=1} + 
+	\lambda\norm{b}^2 \\
+&= 
+	2\lambda \\
+\end{split}
+\end{equation}
+Since we are maximizing, $\lambda$ should be as 
+large as possible. The eigenvector that has the 
+highest eigenvalue is called the \textit{principal} 
+eigenvector or $\Sigma$.
+
+\subsection{Optimal value of $b$ as projected data variance.}
+We saw that the optimal direction is actually just 
+the principal eigenvector of the covariance matrix $\Sigma$.
+Let's look at the loss function again from a different
+perspective. Let's look again at what it means to maximize 
+$b^T\Sigma b$. From (\ref{eq:sample_var}) we know that:
+
+\begin{equation}
+b^T\Sigma b 
+= \frac{1}{n}\sum_{i=1}^{n}\norm{x_i^Tb}^2 
+= \frac{1}{n}\sum_{i=1}^{n}z_i^2 
+= \frac{1}{n}\sum_{i=1}^{n}(z_i - 0)^2
+\end{equation}
+
+Note that this is simply the empirical (biased) variance of
+the projected data points, since the projected mean is 
+exactly the projection of the origin (centered data) onto
+the line going through the origin. Thus the projected mean
+is also $0$. We can thus interpret this as:
+\begin{equation}
+	b^T\Sigma b = Var[z]
+\end{equation}
+So we can either interpret the objective in two ways.
+One as finding the principal eigenvector of the sample 
+covariance matrix or as the maximization of the projected
+data. Figure \ref{fig:projected_variance} below shows this visually:
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](x1) at (-2,-2.5) ;
+	\coordinate[](x2) at (-0.1,0.4) ;
+	\coordinate[](x3) at (-0.2,-1.3);
+	\coordinate[](x4) at (1,2);
+	\coordinate[](x5) at (1.7, 1);
 	
-	This leaves the question, how many of the top eivenvectors should we keep? This has to be decided in a more empirical way, for example one could gather all eigenvalues and sort them and plot their value against index as follows:
-	\begin{figure}[h!]
-		\centering
-		\includegraphics[scale = 0.7]{\figDir/eigenspectrum.PNG}
-		\label{fig:eigenspectrum}
-		\caption{Sorted eigenvalues plotted against index}
-	\end{figure}
-	\pagebreak
-	In this case it seems like taking the top 50 eigenvectors to represent a reduced dataset would be a good approximation. An engineering rule would be to cut off at "the knee" where the eigenspectrum starts to plateau rapidly.
+	\draw[](x1)circle (0.05) node[xshift=2ex]{$x_1$};
+	\draw[](x2)circle (0.05) node[xshift=2ex]{$x_2$};
+	\draw[](x3)circle (0.05) node[xshift=2ex]{$x_3$};
+	\draw[](x4)circle (0.05) node[xshift=2ex]{$x_4$};
+	\draw[](x5)circle (0.05) node[xshift=2ex]{$x_5$};
+	
+	\draw[dashed, green](-3,-3)--(3,3);
+	\draw[red](x1)--(-2.25,-2.25) circle (0.05);
+	\draw[red](x2)--(0.15,0.15) circle (0.05);
+	\draw[red](x3)--(-0.75,-0.75) circle (0.05);
+	\draw[red](x4)--(1.5,1.5) circle (0.05);
+	\draw[red](x5)--(1.35,1.35) circle (0.05);
+	
+	\draw[dashed, purple](-3,3)--(3,-3);
+	\draw[blue,thin](x1)--(.25,-.25) circle (0.05);
+	\draw[blue,thin](x2)--(-0.25,0.25) circle (0.05);
+	\draw[blue,thin](x3)--(0.55,-0.55) circle (0.05);
+	\draw[blue,thin](x4)--(-0.5,0.5) circle (0.05);
+	\draw[blue,thin](x5)--(0.35, -0.35) circle (0.05);
+	
+	\draw[->] (-3,0) -- (3,0);
+	\draw[->] (0,-3) -- (0,3);
+	\end{tikzpicture}
+	\caption{Visual of projected variance maximization.}
+	\label{fig:projected_variance}
+\end{figure}
+Clearly the purple line has lower projected variance 
+than the green line. Intuitively the worst case line 
+would project all points onto the same point, losing 
+all information (variance). The best case would 
+maximize the the variance. Variance of the projections
+can then be seen as how much information is retained 
+when projecting.
+
+\section{Principal Component Analysis(PCA)}
+We've seen the case of a single line, now we could 
+ask ourselves, \textit{Could we perform another 
+projection?}. Let's take a look at the so called 
+\textit{residual}, which is the original data point
+minus the projected data point. In essence what the
+residuals mean is the original signal (data point)
+when removing all signal in the principal direction.
+\begin{equation}
+\label{eq:residual_definition}
+\begin{split}
+	 r_i := x_i - (a + bz_i) &= x_i - (x_i)^Tbb\\
+	 &=(\ID - bb^T)x_i
+\end{split}
+\end{equation}
+The above result was derived using $x_i^Tbb = 
+bx_i^Tb=bb^Tx_i$. Figure \ref{fig:residual} shows
+what the residuals looks like, however since there
+are only $2$ dimensions it's somewhat less clear.
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+	\coordinate[](origin) at (0,0) ;
+	\coordinate[](x1) at (-2,-2.5) ;
+	\coordinate[](x2) at (-0.1,0.4) ;
+	\coordinate[](x3) at (-0.2,-1.3);
+	\coordinate[](x4) at (1,2);
+	\coordinate[](x5) at (1.7, 1);
+	
+	\draw[](x1)circle (0.05) node[xshift=2ex]{$x_1$};
+	\draw[](x2)circle (0.05) node[xshift=2ex]{$x_2$};
+	\draw[](x3)circle (0.05) node[xshift=2ex]{$x_3$};
+	\draw[](x4)circle (0.05) node[xshift=2ex]{$x_4$};
+	\draw[](x5)circle (0.05) node[xshift=2ex]{$x_5$};
+	
+	\draw[dashed, green](-3,-3)--(3,3);
+	\draw[->, red](x1)->(-2.25,-2.25) circle (0.05);
+	\draw[->, red](x2)->(0.15,0.15) circle (0.05);
+	\draw[->, red](x3)->(-0.75,-0.75) circle (0.05);
+	\draw[->, red](x4)->(1.5,1.5) circle (0.05);
+	\draw[->, red](x5)->(1.35,1.35) circle (0.05);
+	
+	\draw[->](origin) -- (0.25,-0.25);
+	\draw[->](origin) -- (-0.25,0.25);
+	\draw[->](origin) -- (0.55,-0.55);
+	\draw[->](origin) -- (-0.5, 0.5);
+	\draw[->](origin) -- (0.35,-0.35);
+	
+	\draw[->] (-3,0) -- (3,0);
+	\draw[->] (0,-3) -- (0,3);
+	\end{tikzpicture}
+	\caption{Visualisation of residuals.}
+	\label{fig:residual}
+\end{figure}
+
+\subsection{PCA as an iterative process}
+What if we project the residuals to an optimal line. 
+We simply treat the residuals as our new data. Note that
+the analysis to do this is exactly the same case as in 
+previous sections. We also need the fact that the mean
+of the residuals is again centered since:
+\begin{equation}
+\frac{1}{n}\sum_{i=1}^{n}r_i 
+	= (\ID - bb^T)\frac{1}{n}\sum_{i=1}^{n}x_i = 0
+\end{equation}
+This means that the analysis can be done exactly the 
+same. Like in previous section, minimizing $\sum_{i-1}^{n}
+\norm{r_i^Tbb - r_i}^2$ for b will result in having 
+to maximize $b^T(\frac{1}{n}\sum_{i=1}^{n}r_ir_i^T)b 
+= b^T\Sigma_rb$ for b. 
+\\\\
+We could simply find the principal eigenvector of 
+$\Sigma_r $ and do this iteratively, but maybe we could 
+exploit a relationship to make it simpler? So what exactly is the 
+relationship between $\Sigma_r$ and $\Sigma$? We analyse 
+this as follows using (\ref{eq:residual_definition}), the
+fact that $(\ID - bb^T)$ is idempotent as shown in equation 
+(\ref{eq:idempot}) and that $\Sigma$ is symmetric:
+\begin{equation}
+\label{eq:residuals_loss}
+\begin{split}
+\frac{1}{n}\sum_{i=1}^{n}r_ir_i^T 
+	&= \frac{1}{n}\sum_{i=1}^{n}(\ID - bb^T)x_i((\ID - bb^T)x_i)^T\\
+	&= \frac{1}{n}\sum_{i=1}^{n}(\ID - bb^T)x_ix_i^T(\ID - bb^T)^T\\
+	&= (\ID - bb^T)\Sigma(\ID - bb^T)^T \\
+	&= (\ID - bb^T)(\ID - bb^T)\Sigma^T \\	
+	&= \Sigma - b\Sigma b^T\\
+	&= \Sigma - \lambda bb^T			
+\end{split}
+\end{equation}
+Note that in line 4 in equation \ref{eq:residuals_loss}
+we used the fact that $(\ID - bb^T)$ and $\Sigma$ are symmetric, 
+which implies $\Sigma (\ID - bb^T) = (\ID - bb^T) \Sigma$.
+We can already notice something important, $b$ 
+(the eigenvector of $\Sigma$) is now also an eigenvector
+of $(\Sigma - \lambda bb^T)$:
+\begin{equation}
+(\Sigma - \lambda bb^T)b = \Sigma b - \lambda b = 0\\
+\end{equation}
+
+The reverse is obviously true an eigenvector of 
+$(\Sigma - \lambda bb^T)$ is also an eigenvector of
+$\Sigma$, it follows from the previous. This $v$ is 
+the principal eigenvector of $(\Sigma - \lambda bb^T)$ 
+(by construction) and the second principle eigenvector 
+of $\Sigma$, by iterating $m$ times we find $m$ pairwise 
+orthogonal eigenvectors. Figure \ref{fig:residual} shows 
+visually that using the residuals to find an optimal 
+projection will find maximum projected variance when 
+the line is orthogonal to the green line. Another way to 
+see why they are orthogonal is by noting that $\Sigma$ is 
+positive semi-definite ($\lambda_i > 0$) because it's 
+symmetric so the eigenvectors are orthogonal\footnote{say 
+$x$ and $y$ are eigenvectors with $\lambda_1$ and 
+$\lambda_2$ as eigenvalues of $A$ then $\lambda_1 <x,y> 
+= <Ax,y> = <x,A^Ty> = <x,Ay>=<x,y>\lambda_2$ since $\lambda_1
+\neq \lambda_2$ then $<x,y>=0$.}.
+
+\subsection{PCA as a diagonalization problem}
+Recall that $\Sigma$ is symmetric so it may be diagonalized into orthogonal matrices:
+\begin{equation}
+\Sigma = U\Lambda U^T
+\end{equation}
+Where $U=(u_1, u_2, \dots, u_m)$ and $\Lambda = diag(\lambda_1, \dots, \lambda_m)$ note that the eigenvectors are orthogonal so that:
+\begin{equation}
+	U^Tu_i = \begin{bmatrix}
+	u_1^T\\
+	\vdots\\
+	u_m^T
+	\end{bmatrix}u_i = \begin{bmatrix}
+	u_1^Tu_i\\
+	\vdots\\
+	u_m^Tu_i
+	\end{bmatrix} = \begin{bmatrix}
+	0\\
+	\vdots\\
+	u_i^Tu_i = 1\\
+	\vdots\\
+	0\\
+	\end{bmatrix}=e_i
+\end{equation}
+Using this we can clearly see that:
+\begin{equation}
+\begin{split}
+	U\Lambda U^T & =\begin{bmatrix}
+	u_1 & \dots & u_m\\
+	\end{bmatrix}
+	\begin{bmatrix}
+	\lambda_1 &\dots & 0\\
+	\vdots&\cdots&\vdots\\
+	0& \dots& \lambda_m\\
+	\end{bmatrix}
+	\begin{bmatrix}
+	u_1 \\ \vdots \\ u_m\\
+	\end{bmatrix}		\\
+	&=\begin{bmatrix}
+	\lambda_1u_1 & \dots & \lambda_mu_m\\
+	\end{bmatrix}\begin{bmatrix}
+	u_1 \\ \vdots \\ u_m\\
+	\end{bmatrix}\\
+	&= \Sigma \underbrace{UU^T}_{\ID} = \Sigma
+\end{split}
+\end{equation}
+In order to then reduce the dimension of the data we
+would simply project our data onto the $k$ principal
+components:
+\begin{equation}
+Z = U_k^T X
+\end{equation}
+
+\subsection{Colclusion: PCA}
+Let's recap what we did to find out what PCA is.
+\\\\
+First we investigated that the orthogonal projection
+is the optimal projection of a data point onto a line
+considering the euclidean distance as loss measure.
+\\\\
+Second we looked at finding the optimal line onto which
+we could project our data such that we keep as much
+information as possible. As it turned out, the optimal
+intercept $a$ is exactly the mean of all the points.
+The optimal $b$ turned out to be the principal component
+of the sample covariance matrix. Alternatively, the $b$
+direction is exactly the direction which maximizes the 
+projected variance of the points.
+\\\\
+Thirdly we looked at iteratively projecting the residuals
+onto the optimal line. This is exactly what PCA does.
+Another way to look at it was as a diagonalization 
+problem of $\Sigma = U\Lambda U^T$.
+\\\\
+Now where is the \textit{reduction} of the data exactly? 
+Well every point can be projected to $d$ principle 
+eigenvectors of $\Sigma$ to give us $U^T x_i = 
+(u_1^Tx_i \dots u_d^Tx_i) = (z_1 \dots z_d)$ this gives 
+us a reduction to the optimal weights for a linear combination 
+of the lower dimensional basis (the $d$ principal eigenvectors). 
+To re-construct the data point we take a linear combination of 
+the $d$ principal eigenvectors. This can be done as 
+$(z_1 \dots z_d)U$. Of course when you pick $d$ to be the 
+dimension of the data then there is no reduction but an 
+exact decomposition of the data matrix $X$. So basically:
+
+\begin{itemize}
+ 	\item Reduction: 
+ 	\begin{equation}
+ 	Z 
+ 	= U^T X
+ 	= 
+ 	\begin{pmatrix}
+ 	\horzbar & u_1 & \horzbar\\
+ 	 & \vdots & \\
+ 	\horzbar & u_d & \horzbar\\
+ 	\end{pmatrix}
+ 	\begin{pmatrix}
+ 	\vertbar & & \vertbar \\
+ 	x_1 & \dots & x_n\\
+ 	\vertbar & & \vertbar \\
+ 	\end{pmatrix} 
+ 	= 
+ 	\begin{pmatrix}
+ 	z_{1,1} & \dots& z_{n,1}\\
+ 	\vdots& \ddots & \vdots\\
+ 	z_{1,d} & \dots & z_{n,d}\\
+ 	\end{pmatrix}
+ 	\end{equation}
+we can clearly see that we reduced the data from $\Real^m$ 
+to $\Real^d$. Only if $d < m$ is there really a reduction 
+and is there truly an approximation when reconstructing!
+ 	\item Re-construction:
+ 	\begin{equation}
+ 	\hat{X} = UZ = \begin{bmatrix} 
+ 	\sum_{i=1}^{d}z_{1,i}u_i & \dots & \sum_{i=1}^{d}z_{n,i}u_i \\
+ 	\end{bmatrix}
+ 	\end{equation}
+Here I wrote it out explicitly so it's easy to see that 
+the reduction is just keeping track of weights for the 
+linear combination of the $d$ principal eigenvectors.
+\end{itemize}
+		 
+\section{Practical PCA: Finding pricipal eigenvector}
+We've seen a derivation of PCA, one perspective of PCA 
+is iteratively finding principal eigenvectors or certain 
+symmetric matrices (empirical biased covariance matrix of 
+the data or residuals). However we skipped the part where 
+we actually find the principal eigenvector. One practical 
+way of finding the principal eigenvector is the 
+\textit{power method}.
+
+\subsection{Power method: practical principal eigenvector}
+Assume a symmetric matrix $\Sigma$ and we wish 
+to find $u_1$, the principal eigenvector of $\Sigma$. 
+The algorithm goes as follows:
+\begin{enumerate}
+	\item Initialize $v_0$ a random vector. For simplicity 
+	we assume that $\langle u_1,v_0\rangle \neq 0$ and that 
+	the principal eigenvalue is unique i.e. $|\lambda_1| > |\lambda_j|$.
+	
+	\item Iteratively apply the following operation:
+	\begin{equation}
+	v_{t+1} = \frac{\Sigma v_t}{\norm{\Sigma v_t}}
+	\end{equation}
+	 
+	\item It holds that:
+	\begin{equation}
+	\lim_{t\rightarrow\infty} v_t = u_1
+	\end{equation}
+	 
+	\item To find the corresponding eignenvalue:
+	\begin{equation}
+	\lambda_1 
+		= \lim_{t\rightarrow\infty} \frac{\norm{\Sigma v_t}}{\norm{v_t}} 
+		= \frac{\norm{\Sigma u_1}}{\norm{u_1}} 
+		= \frac{\norm{\lambda_1u_1}}{\norm{u_1}} 
+	\end{equation}
+\end{enumerate}
+
+\noindent
+Why does this algorithm work? We assume $\Sigma$ (as in last
+section) is p.s.d. and symmetric (true for $XX^T$). In this 
+case the eigenvectors are all orthogonal to each other so they 
+form a basis for $\Real^m$, this means any $v_0 \in \Real^m$ 
+can be written as a linear combination of eigenvectors:
+
+\begin{equation}
+\label{eq:eigenbasis}
+v_0 = \sum_{i=1}^{m} a_i u_i
+\end{equation}
+
+\noindent 
+how does $v_t$ evolve considering this?
+
+\begin{equation}
+\label{eq:evolve_power}
+v_{t} 
+	= \frac{\Sigma^t v_0}{\norm{\Sigma^t v_0}} 
+	= \frac{\sum_{i=1}^{m}a_i\Sigma^t u_i}{\norm{\Sigma^t v_0}}
+\end{equation}
+
+\noindent 
+Note equation (\ref{eq:evolve_power}) was obtained by 
+recursively finding $v_i$ and using (\ref{eq:eigenbasis}). 
+Since $u_i$ are eigenvectors by assumption we can re-write 
+it as follows by pulling out the highest eigenvalue:
+
+\begin{equation}
+\frac{a_1\lambda_1^tu_1 
++ \sum_{i=2}^{m}\frac{a_i}{a_1}
+(\frac{\lambda_i}{\lambda_1})^t u_i}
+{\norm{\Sigma^t v_0}}
+\end{equation}
+
+\noindent
+To understand the limit as $t\rightarrow\infty$ we 
+see for the numerator:
+	
+\begin{equation}
+\lim_{t\rightarrow\infty}a_1\lambda_1^tu_1 
+	+ \sum_{i=2}^{m}\frac{a_i}{a_1}
+	(\underbrace{\frac{\lambda_i}{\lambda_1}}_{=0})^t u_i 
+	= a_1\lambda_1^tu_1
+\end{equation}
+The denomenator can be interpreted in the same way 
+(using $\norm{u_1} = 1$), cancelling the $a_1\lambda_1^t$ 
+resulting in power iteration method converging to $u_1$.
+	
+\section{Practical PCA: choosing amount of eigenvectors}
+How many eigenvectors should we \textit{select} or \textit{keep}
+and how should we select which ones to keep and not keep. 
+Intuitively from previous section which looked at PCA as a 
+variance maximisation of the projected data, we should keep 
+the $k$ eigenvectors which have the highest eigenvalues. It 
+represents how much information is contained within the 
+eigenvector for specific data.
+\\\\
+This leaves the question, how many of the top eivenvectors 
+should we keep? This has to be decided in a more empirical way, 
+for example one could gather all eigenvalues and sort them and 
+plot their value against index as follows:
+	
+\begin{figure}[h!]
+\centering
+\includegraphics[scale = 0.7]{\figDir/eigenspectrum.PNG}
+\label{fig:eigenspectrum}
+\caption{Sorted eigenvalues plotted against index}
+\end{figure}
+
+\noindent
+In this case it seems like taking the top 50 eigenvectors 
+to represent a reduced dataset would be a good approximation. 
+An engineering rule would be to cut off at \textit{the knee} 
+where the eigenspectrum starts to plateau rapidly.

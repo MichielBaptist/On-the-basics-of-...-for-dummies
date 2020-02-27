@@ -102,7 +102,105 @@ x_1^Tx_1 & & &\\
 A matrix $A$ is idempotent iff $AA = A$.
 \end{defn}
 
+\begin{prop}
+Let $X \in \Real^{m \times n}$ then
+\begin{equation}
+XX^T = \sum_{i=1}^{n}x_ix_i^T
+\end{equation}
+\end{prop}
+
+\begin{proof}
+Depending on your viewpoint of matrix multiplication this property
+might seem trivial to prove. However, here is one way. Let's begin 
+from the left side of the equation:
+\begin{equation}
+\begin{split}
+XX^T &=
+\begin{pmatrix}
+\horzbar & x_1 & \horzbar \\
+& \hdots & \\
+\horzbar & x_m & \horzbar \\
+\end{pmatrix}
+\begin{pmatrix}
+\vertbar & & \vertbar \\
+x_1 & & x_m \\
+\vertbar & & \vertbar \\
+\end{pmatrix}\\
+&= \begin{pmatrix}
+\norm{x_1}^2 & x_{1} x_{2}^T& \\
+x_2 x_1^T & \norm{x_2}^2 &  & \\
+& & \ddots & \\
+& & & \norm{x_m}^2\\
+\end{pmatrix}\\
+&= \begin{pmatrix}
+\sum_{j=1}^{n}x_{1j}^2 & \sum_{j=1}^{n} x_{1j}x_{2j} & \\
+\sum_{j=1}^{n} x_{1j}x_{2j} & \sum_{j=1}^{n}x_{2j}^2  &  & \\
+& & \ddots & \\
+& & & \sum_{j=1}^{n}x_{mj}^2 \\
+\end{pmatrix}\\
+&= \sum_{j=1}^{n}
+\begin{pmatrix}
+x_{1j}^2 & x_{1j}x_{2j} & \\
+x_{1j}x_{2j} & x_{2j}^2  &  & \\
+& & \ddots & \\
+& & & x_{nj}^2 \\
+\end{pmatrix}\\
+&= \sum_{j=1}^{n} x_jx_j^T
+\end{split}
+\end{equation}
+\end{proof}
 \section*{Matrix derivatives}
+
+\begin{prop}
+Given vector $b \in \Real^m$ and symmetric matrix 
+$X \ in \Real^{m \times m}$ then it holds that:
+\begin{equation}
+\nabla_b b^TXb = 2Xb
+\end{equation}
+\end{prop}
+\begin{proof}
+Let's write out the $b^tXb$:
+\begin{equation}
+\begin{split}
+b^T X b &= \sum_{i=1}^{m} b_i (Xb)_i\\
+&= \sum_{i=1}^{m} b_i \big( \sum_{j=1}^{m} x_{ij}b_j\big)\\
+&= \sum_{i=1}^{m}\sum_{j=1}^{m} b_i b_j x_{ij}\\
+\end{split}
+\end{equation}
+Finding the partial derivative for a given $b_k$ is then
+straight forward:
+\begin{equation}
+\begin{split}
+\pd{x_k}
+	\sum_{i=1}^{m}\sum_{j=1}^{m} b_i b_j x_{ij} 
+	&= 
+	  2b_kx_{kk} 
+	+ \sum_{\substack{j=1\\ j\neq k}}^{m} b_jx_{kj} 
+	+ \sum_{\substack{j=1\\ j\neq k}}^{m} b_jx_{jk} 
+\\&=
+	2\sum_{j=1}^{m} b_jx_{kj}
+\\&=
+	2x_kb_j
+\end{split}
+\end{equation}
+The gradient is defined as:
+\begin{equation}
+\nabla_x f(x)= 
+\begin{pmatrix}
+\frac{\partial}{\partial x_1} f(x)\\
+\vdots \\
+\frac{\partial}{\partial x_m} f(x)\\
+\end{pmatrix}
+=2
+\begin{pmatrix}
+x_1 b\\
+\vdots \\
+x_m b
+\end{pmatrix}
+=
+2Xb
+\end{equation}
+\end{proof}
 
 \begin{prop}
 $\nabla_x \norm{x}^2 = 2x$
