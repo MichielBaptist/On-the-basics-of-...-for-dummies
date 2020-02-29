@@ -1,4 +1,7 @@
 *.log
 *.gz
+*.aux
+*.out
+*.toc
 commit.m
 TODO.txt
