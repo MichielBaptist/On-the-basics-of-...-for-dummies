@@ -377,8 +377,14 @@ In this case the probability distribution would look as follows:
 \begin{equation}
 p(X_1, \dots, X_m) = p(X_1)p(X_2 \mid X1)\dots p(X_m \mid X_1, \dots, X_{m-1})
 \end{equation}
-For each $p(X_i \mid X_1, \dots, X_{i-1})$ we need exactly $K^i - 1$
-parameters to define it. In total we obtain exactly $K^m - 1$ parameters
+For each $p(X_i \mid X_1, \dots, X_{i-1})$ we need exactly $K^{i-1}(K - 1)$
+parameters to define it. We derive it mathematically:
+\begin{equation}
+\sum_{i=1}^{m} K^{i-1}(K - 1) = K^m -1
+\end{equation}
+The proof for this equation can be found in the definitions
+section at the start.
+In total we obtain exactly $K^m - 1$ parameters
 needed to fully define the joint distribution. This is of course
 unmanageable in any real world context. There are several ways 
 one could combat this. One way is by imposing an independence structure

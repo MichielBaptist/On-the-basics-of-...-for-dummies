@@ -295,3 +295,45 @@ A_{.m}
 \end{split}
 \end{equation}
 \end{proof}
+
+\section*{Geometric properties}
+
+\begin{prop}
+For any $k \neq 1$ and $m > 1 $ it holds that:
+\begin{equation}
+\sum_{i = 1}^{m} k^{i-1}(k - 1) = k^m -1
+\end{equation}
+\end{prop}
+\begin{proof}
+We can decompose the left hand side of the equation:
+\begin{equation}
+\label{eq:geom_proof_1}
+\begin{split}
+\sum_{i = 1}^{m} k^{i-1}(k - 1)
+	&= \sum_{i = 1}^{m}k^i - \sum_{i = 1}^{m} k^{i-1}
+\end{split}\end{equation}
+We can use the standard proof for geometric series. Assume
+$\sum_{i = 1}^{m}k^i = S$ then it holds that:
+\begin{equation}\label{eq:geom_proof_2}\begin{split}
+kS 
+	&= \underbrace{k^2 + k^3 + \dots + k^m}_{= S - k} + k^{m+1} \\
+	&= S - k + k^{m+1}\\
+S(k-1) 
+	&= 	k^{m+1} - k \\
+S 
+	&= \frac{k^{m+1} - k}{k - 1}
+\end{split}\end{equation}
+Note that for the right part in the right hand side of equation
+\ref{eq:geom_proof_1}:
+\begin{equation}
+\sum_{i=1}^{m} k^{i-1} = S/k
+\end{equation}
+We complete the proof by plugging in the results from equation
+\ref{eq:geom_proof_1} and \ref{eq:geom_proof_2}:
+\begin{equation}\begin{split}
+\frac{k^{m+1} - k}{k - 1} - \frac{k^m - 1}{k - 1} 
+	&= \frac{k^{m+1} - k^m - k + 1}{k - 1}\\
+	&= \frac{(k^m -1)(k-1)}{k -1}
+\end{split}\end{equation}
+The proof holds for $k \neq 1$.
+\end{proof}
