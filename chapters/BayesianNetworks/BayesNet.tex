@@ -88,14 +88,195 @@ cycle (right).}
 \end{figure}
 
 \noindent
-A crucial and simple concept in DAGs is the concept of parents.
-\begin{defn}[Parents in a DAG]
+Two important concepts in DAGs is the concept of parents, children 
+and descendants.
+\begin{defn}[Parents]
 Given a vertex $v \in V$ in a DAG $G=(V, E)$ the parents of 
 $v$ are all the vertices for which an outgoing edge ends in $v$:
 \begin{equation}
 Pa(v) = \{ u \in V \mid (u, v) \in E\}
 \end{equation}
 \end{defn}
+
+\begin{defn}[Children]
+Given a vertex $v \in V$ in a DAG $G=(V, E)$ the children of 
+$v$ are all the vertices $u$ in which an outgoing edge of $v$
+ends.
+\begin{equation}
+C(v) = \{ u \in V \mid (v, u) \in E\}
+\end{equation}
+\end{defn}
+
+\begin{defn}[Descendants]
+Given a vertex $v \in V$ in a DAG $G=(V, E)$ the descendants of 
+$v$ are all its children and recursively the descendants of all its 
+children.
+\begin{equation}
+Des(v) = \bigcup_{u \in C(v)} Des(u) \cup C(v)
+\end{equation}
+\end{defn}
+
+\noindent
+Figure \ref{fig:exmpl_child_parent_des} shows the parents, children
+and descendants of node $v$ in a DAG.
+
+\begin{figure}[h!]
+\begin{minipage}[c]{0.32\textwidth}
+\scalebox{0.9}{\begin{tikzpicture}
+
+	\node[cloud, 
+		  draw, 
+		  cloud puffs = 15, 
+		  minimum width = 4cm, 
+		  aspect = 1.4](cloud) at (1.15,1.2){parents};
+	\draw (0,0) node[draw = black,
+			   		 shape = circle](p1){$p_1$};
+	\draw (1.15,0) node[](1){$\dots$};
+	\draw (2.3,0) node[draw = black,
+			   		 shape = circle](p2){$p_n$};
+	
+	\draw (1.15,-1) node[draw = black,
+			   		 	shape = circle](v){$v$};
+	\draw (0,-2) node[draw = black,
+			   		 shape = circle](c1){$c_1$};
+	\draw (1.15,-2) node[](1){$\dots$};
+	\draw (2.3,-2) node[draw = black,
+			   		 shape = circle](c2){$c_n$};
+	\node[cloud, 
+	  draw, 
+	  cloud puffs = 15, 
+	  minimum width = 4cm, 
+	  aspect = 1.4](cloudC) at (1.15,-3.4){children};
+			   		 
+	\draw[->] (-0.4, 0.8) -- (p1);
+	\draw[->] (0.4, 0.64) -- (p1);
+	
+	\draw[->] (1.9, 0.64) -- (p2);
+	\draw[->] (2.7, 0.8) -- (p2);
+	
+	\draw[->] (p1) -- (v);
+	\draw[->] (p2) -- (v);
+	
+	\draw[->] (v) -- (c1);
+	\draw[->] (v) -- (c2);
+	
+	\draw[->] (c1) -- (-0.37, -2.8);
+	\draw[->] (c1) -- (0.37, -2.6);
+	
+	\draw[->] (c2) -- (1.93, -2.6);
+	\draw[->] (c2) -- (2.67, -2.8);
+	
+	\draw [draw=red, 
+		   rounded corners, 
+		   very thick] (-0.5, -0.5) rectangle(2.8, 0.5);
+			   		 
+\end{tikzpicture}}
+\end{minipage}
+\begin{minipage}[c]{0.32\textwidth}
+\scalebox{0.9}{\begin{tikzpicture}
+
+	\node[cloud, 
+		  draw, 
+		  cloud puffs = 15, 
+		  minimum width = 4cm, 
+		  aspect = 1.4](cloud) at (1.15,1.2){parents};
+	\draw (0,0) node[draw = black,
+			   		 shape = circle](p1){$p_1$};
+	\draw (1.15,0) node[](1){$\dots$};
+	\draw (2.3,0) node[draw = black,
+			   		 shape = circle](p2){$p_n$};
+	
+	\draw (1.15,-1) node[draw = black,
+			   		 	shape = circle](v){$v$};
+	\draw (0,-2) node[draw = black,
+			   		 shape = circle](c1){$c_1$};
+	\draw (1.15,-2) node[](1){$\dots$};
+	\draw (2.3,-2) node[draw = black,
+			   		 shape = circle](c2){$c_n$};
+	\node[cloud, 
+	  draw, 
+	  cloud puffs = 15, 
+	  minimum width = 4cm, 
+	  aspect = 1.4](cloudC) at (1.15,-3.4){children};
+			   		 
+	\draw[->] (-0.4, 0.8) -- (p1);
+	\draw[->] (0.4, 0.64) -- (p1);
+	
+	\draw[->] (1.9, 0.64) -- (p2);
+	\draw[->] (2.7, 0.8) -- (p2);
+	
+	\draw[->] (p1) -- (v);
+	\draw[->] (p2) -- (v);
+	
+	\draw[->] (v) -- (c1);
+	\draw[->] (v) -- (c2);
+	
+	\draw[->] (c1) -- (-0.37, -2.8);
+	\draw[->] (c1) -- (0.37, -2.6);
+	
+	\draw[->] (c2) -- (1.93, -2.6);
+	\draw[->] (c2) -- (2.67, -2.8);
+			   		 
+	\draw [draw=red, 
+		   rounded corners, 
+		   very thick] (-0.5, -2.5) rectangle (2.8, -1.5);
+\end{tikzpicture}}
+\end{minipage}
+\begin{minipage}[c]{0.32\textwidth}
+\scalebox{0.9}{
+\begin{tikzpicture}
+
+	\node[cloud, 
+		  draw, 
+		  cloud puffs = 15, 
+		  minimum width = 4cm, 
+		  aspect = 1.4](cloud) at (1.15,1.2){parents};
+	\draw (0,0) node[draw = black,
+			   		 shape = circle](p1){$p_1$};
+	\draw (1.15,0) node[](1){$\dots$};
+	\draw (2.3,0) node[draw = black,
+			   		 shape = circle](p2){$p_n$};
+	
+	\draw (1.15,-1) node[draw = black,
+			   		 	shape = circle](v){$v$};
+	\draw (0,-2) node[draw = black,
+			   		 shape = circle](c1){$c_1$};
+	\draw (1.15,-2) node[](1){$\dots$};
+	\draw (2.3,-2) node[draw = black,
+			   		 shape = circle](c2){$c_n$};
+	\node[cloud, 
+	  draw, 
+	  cloud puffs = 15, 
+	  minimum width = 4cm, 
+	  aspect = 1.4](cloudC) at (1.15,-3.4){children};
+			   		 
+	\draw[->] (-0.4, 0.8) -- (p1);
+	\draw[->] (0.4, 0.64) -- (p1);
+	
+	\draw[->] (1.9, 0.64) -- (p2);
+	\draw[->] (2.7, 0.8) -- (p2);
+	
+	\draw[->] (p1) -- (v);
+	\draw[->] (p2) -- (v);
+	
+	\draw[->] (v) -- (c1);
+	\draw[->] (v) -- (c2);
+	
+	\draw[->] (c1) -- (-0.37, -2.8);
+	\draw[->] (c1) -- (0.37, -2.6);
+	
+	\draw[->] (c2) -- (1.93, -2.6);
+	\draw[->] (c2) -- (2.67, -2.8);
+			   		 
+	\draw [draw=red, 
+		   rounded corners, 
+		   very thick] (-1, -1.5) rectangle (3.3, -4.5);
+\end{tikzpicture}}
+\end{minipage}
+\caption{Visualization of parents $Pa(v)$, children $C(v)$ and
+descendants $Des(v)$ of a node $v$ in a DAG.}
+\label{fig:exmpl_child_parent_des}
+\end{figure}
 
 \section{Bayesian networks with DAGs}
 What do these DAGs have to do with Bayesian networks? As mentioned
@@ -555,6 +736,7 @@ networks.
 This 3 node network has already been discussed. Namely the network 
 in figure \ref{fig:BN_CI_ABC}. We've already mentioned that $C$
 will \textit{block} information flow from $A$ to $B$ if it is given.
+We will denote this type of path as $A \leftarrow C \rightarrow B$.
 \begin{exmp}
 Consider $A=$ whether or not you have a runny nose.
 $B = $ Whether or not you have a fever. $C=$ whether or not you 
@@ -585,6 +767,7 @@ The second building block is shown in figure \ref{fig:building_block_two}.
 In this case we find a very similar situation as building block one.
 If $C$ is known, information is \textit{blocked} from $A$ to $B$.
 However, information flows freely from $A$ to $B$ if $C$ is unknown.
+We will denote this type as $A \rightarrow C \rightarrow B$.
 
 \begin{figure}[h!]
 \centering
@@ -648,3 +831,409 @@ information flows from $A$ through $C$ to $B$.
 \end{exmp}
 
 \noindent
+Mathematically, we verify that in the general case, $A$ and $B$ are
+not independent. I.e. $A \not \CI B$:
+\begin{equation}\begin{split}
+p(A, B) 
+	&= \sum_c p(A)p(c \mid A)p(B \mid c) \\
+	&= p(A) \sum_c p(c \mid A)p(B \mid c) \\
+	&= p(A) p(B \mid A)
+\end{split}\end{equation}
+In general, $p(B \mid A) \neq p(B)$. In the case $C$ assumes a known
+value, $A$ and $B$ are conditionally independent. We verify:
+\begin{equation}\begin{split}
+p(A, B \mid c) 
+	&= \frac{p(A, B, c)}{p(c)}\\
+	&= \frac{p(A)p(c \mid A)p(B \mid c)}{p(c)} \\
+	&= \frac{p(A)p(c \mid A)}{p(c)} p(B \mid c)\\
+	&= p(A \mid c)p(B \mid c)\\
+\end{split}\end{equation}
+We conclude $A \not \CI B$ but $A \CI B \mid C$.
+
+\subsection{Building block: three}
+The final building block for d-separation can be seen in figure
+\ref{fig:building_block_three}. In this three node Bayesian network
+we observe the opposite. If $C$ is not observed, the information
+is blocked by $C$. However, if $C$ is known, information can flow
+from $A$ to $B$. This type will be denoted as $A \rightarrow C
+\leftarrow B$
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}
+
+	\draw (0,0) node[draw = black,
+					 shape = circle] (A) {$A$};
+	
+	\draw (3,0) node[draw = black,
+					 shape = circle] (B) {$B$};
+					 
+	\draw (1.5,-1) node[draw = black,
+					 shape = circle] (C) {$C$};
+					 
+	\draw[->] (A) -- (C);
+	\draw[->] (B) -- (C);
+	
+	\draw[red, ultra thick, -|] (0, -0.34) .. controls (0.75, -1.4) 
+			..(1.5, -1.6);
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}
+
+	\draw (0,0) node[draw = black,
+					 shape = circle] (A) {$A$};
+	
+	\draw (3,0) node[draw = black,
+					 shape = circle] (B) {$B$};
+					 
+	\draw (1.5,-1) node[draw = black,
+					 shape = circle,
+					 fill = blue,
+					 fill opacity = 0.1,
+					 text opacity = 1.0] (C) {$C$};
+					 
+	\draw[->] (A) -- (C);
+	\draw[->] (B) -- (C);
+	
+	\draw[red, ultra thick, ->] (0, -0.34) .. controls (1.5, -1.8) 
+			..(3, -0.34);
+\end{tikzpicture}
+\end{minipage}
+\caption{The third building block for D-separation. 
+Left, the information is blocked from $A$ to $B$, because $C$
+is unknown. Right the information can flow from $A$ to $B$, 
+because $C$ is known.}
+\label{fig:building_block_three}
+\end{figure}
+
+\begin{exmp}
+Consider $A = $ whether or not your car break fails. $B =$ whether or not
+your car motor has failed. Finally, consider $C = $ whether or not
+you had a car accident. If you don't know whether or not you have a 
+car crash ($C$ unknown), then gaining information about your motor 
+($B = 1$) will not change the probability of your breaks failing 
+($A = 1$). However, assume now that we know that we know that we had
+a car crash ($C = 1$). Clearly if we know it wasn't caused by motor
+failure ($B = 0$), then it was most likely caused by break failure 
+($A = 1$). Hence, information flows from $B$ to $A$ since we know
+$C$.
+\end{exmp}
+
+\noindent
+Let's verify that information gets blocked if $C$ is unknown:
+\begin{equation}\begin{split}
+p(A, B) 
+	&= \sum_c p(A)p(B)p(c \mid A, B)\\
+	&= p(A) p(B) \\
+\end{split}\end{equation}
+We now show the converse. Given $C$, information can freely flow
+from $A$ to $B$:
+\begin{equation}\begin{split}
+p(A, B \mid c) 
+	&= \frac{p(A, B, c)}{p(c)} \\
+	&= \frac{p(A)p(B)p(c \mid A, B)}{p(c)}
+\end{split}\end{equation}
+In general $A \not \CI B \mid C$.
+
+\subsection{D-separation}
+So why did we consider these three graphs in the first place?
+Usually our Bayesian networks do not consist out of three random
+variables. Instead, networks usually consist of thousands of
+random variables. D-separation is a useful tool to graphically
+verify whether two variable sets $A$ and $B$ are conditionally 
+independent given a set of observations $C$.
+
+\begin{defn}[D-separation]
+Given a Bayesian network $(G, \Theta)$ over variables $\textbf{X}$.
+Two variable sets $A \subset \textbf{X}$ and $B \subset \textbf{X}$ 
+are D-separated given observed variable set $C \subset \textbf{X}$ 
+iff for each undirected path $P = P_1\dots P_n$ 
+from set $A$ to set $B$, the information flow is 
+\textit{blocked}. Either by an observed variable $O \in C$ or
+by a missing observed variable $O \notin C$. Concretely, for 
+each sub-path $P' = P_iP_{i+1}P_{i+2} \in P$:
+
+\begin{itemize}
+\item $P'$ is of type $P_i \leftarrow P_{i+1} \rightarrow P_{i+2}$ 
+	and $P_{i+1} \in C$ OR
+\item $P'$ is of type $P_i \rightarrow P_{i+1}\rightarrow P_{i+2}$ 
+	and $P_{i+1} \in C$ OR
+\item $P'$ is of type $P_i \rightarrow P_{i+1}\leftarrow P_{i+2}$
+	and $(Des(P_{i+1}) \cup \{P_{i+1}\}) \cap C = \emptyset$
+\end{itemize}
+\end{defn}
+
+
+\begin{prop}[D-separation implies conditional independence]
+Given a Bayesian network $(G, \Theta)$ over random variables
+$\textbf{X}$. If variable set $A\subset \textbf{X}$ and 
+$B\subset \textbf{X}$ are D-separated given $C \subset \textbf{X}$,
+then it holds that $A \CI B \mid C$ in the joint distribution.
+\begin{equation}
+Dsep(A, B \mid C) \implies A \CI B \mid C
+\end{equation}
+\end{prop}
+
+\noindent
+While a proof would justify this property, intuitively it
+makes a lot of sense. By the property of information flow 
+in the three building blocks (and symmetry of conditional
+independence) we can see how this property makes sense.
+As an example, let's look at the Bayesian network in figure
+\ref{fig:BN_exmpl_dsep}. On the left we find all paths from
+$A$ to $D$ blocked. Thus we can state $Dsep(A, D \mid \{C, B\})$.
+However, on the right information can travel through 
+$A \rightarrow C \leftarrow B$, $C \leftarrow B \rightarrow D$.
+Thus we cannot state $Dsep(A, D \mid C)$.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}
+	
+	\node [draw, circle] (A) at (0,0){$A$};
+	\node [draw, circle,
+		   fill = blue,
+		   fill opacity = 0.1,
+		   text opacity = 1.0] (B) at (2,0){$B$};
+	\node [draw, 
+		   circle,
+		   fill = blue,
+		   fill opacity = 0.1,
+		   text opacity = 1.0] (C) at (1,-1){$C$};
+	\node [draw, circle] (D) at (1,-2){$E$};
+	\node [draw, circle] (E) at (2.2,-1.7){$D$};
+	
+	\draw[->] (A) -- (C);
+	\draw[->] (B) -- (C);
+	\draw[->] (B) -- (E);
+	\draw[->] (C) -- (E);
+	\draw[->] (C) -- (D);
+	\draw[->] (D) -- (E);
+	
+	\draw[red, ultra thick, -|] 
+		(0, -0.33) .. controls (0.3,-0.6) .. (0.6, -.9);
+	\draw[red, ultra thick, -|] 
+		(0.33, 0)  .. controls (1,-0.6)   .. (1.5, 0);
+	
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[c]{0.45\textwidth}
+\begin{tikzpicture}
+	
+	\node [draw, circle] (A) at (0,0){$A$};
+	\node [draw, circle] (B) at (2,0){$B$};
+	\node [draw, 
+		   circle,
+		   fill = blue,
+		   fill opacity = 0.1,
+		   text opacity = 1.0] (C) at (1,-1){$C$};
+	\node [draw, circle] (E) at (1,-2){$E$};
+	\node [draw, circle] (D) at (2.2,-1.7){$D$};
+	
+	\draw[->] (A) -- (C);
+	\draw[->] (B) -- (C);
+	\draw[->] (B) -- (D);
+	\draw[->] (C) -- (E);
+	\draw[->] (C) -- (D);
+	\draw[->] (D) -- (E);
+	
+	\draw[red, ultra thick, -|] 
+		(0, -0.33) .. controls (0.3,-0.6) .. (0.6, -.9);
+	\draw[green, ultra thick, ->](0.33, 0)  
+		.. controls (1,-0.6) .. (1.5, 0)
+		.. controls (1.6, 0.6) and (2.4, 0.6) .. (2.5, 0)
+		.. controls (2.3, -1) .. (2.4, -1.4);
+	
+\end{tikzpicture}
+\end{minipage}
+\caption{Example of D-separation in a Bayesian network. 
+On the left, all paths between $A$ and $D$ are blocked.
+On the right, there is a path $ACBD$ thus no independence. }
+\label{fig:BN_exmpl_dsep}
+\end{figure}
+
+\subsection{Markov blanket}
+Often, one is interested in the conditional probability of 
+a certain variable $X$ in a Bayesian network $(G, \Theta)$,
+given all other variables. As one might expect, we can exploit
+the D-separation property to avoid redundant computation and 
+reduce complexity. Indeed, if all variables in the network are
+given except for $X$ we find a Bayesian network as in figure
+\ref{fig:exmpl_markov_blanket}. We observe through D-separation
+that information flow is blocked from $X$ to all other nodes 
+except the children, parents and parents of children.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+
+	\node[cloud, 
+		  draw, 
+		  cloud puffs = 15, 
+		  minimum width = 4cm, 
+		  aspect = 1.4](cloud) at (1.15,1.2){parents};
+	\draw (0,0) node[draw = black,
+			   		 shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](p1){$p_1$};
+	\draw (1.15,0) node[](1){$\dots$};
+	\draw (2.3,0) node[draw = black,
+			   		 shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](p2){$p_n$};
+	
+	\draw (1.15,-1) node[draw = black,
+			   		 	shape = circle](X){$X$};
+	\draw (0,-2) node[draw = black,
+			   		 shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](c1){$c_1$};
+	\draw (1.15,-2) node[](1){$\dots$};
+	\draw (2.3,-2) node[draw = black,
+			   		 shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](c2){$c_n$};
+			   		 
+	\draw (-1, -1) node[draw = black,
+						shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](U1){$u_1$};
+	\draw (3.3, -1) node[draw = black,
+						shape = circle,
+			   		 fill = blue,
+			   		 fill opacity = 0.1,
+			   		 text opacity = 1.0](U2){$u_n$};
+						
+	\node[cloud, 
+	  draw, 
+	  cloud puffs = 15, 
+	  minimum width = 4cm, 
+	  aspect = 1.4](cloudC) at (1.15,-3.4){children};
+			   		 
+	\draw[->] (U1) -- (c1);
+	\draw[->] (U2) -- (c2);
+		
+	\draw[->] (-0.4, 0.8) -- (p1);
+	\draw[->] (0.4, 0.64) -- (p1);
+	
+	\draw[->] (1.9, 0.64) -- (p2);
+	\draw[->] (2.7, 0.8) -- (p2);
+	
+	\draw[->] (p1) -- (X);
+	\draw[->] (p2) -- (X);
+	
+	\draw[->] (X) -- (c1);
+	\draw[->] (X) -- (c2);
+	
+	\draw[->] (c1) -- (-0.37, -2.8);
+	\draw[->] (c1) -- (0.37, -2.6);
+	
+	\draw[->] (c2) -- (1.93, -2.6);
+	\draw[->] (c2) -- (2.67, -2.8);
+			   		 
+	\draw[-|, red, ultra thick] (0.8, -1) -- (0.2, -0.5);
+	\draw[-|, red, ultra thick] (1.5, -1) -- (2.1, -0.5);
+	\draw[-|, red, ultra thick] (0.84, -1.2) 
+		.. controls (0, -1.5) .. (-0.5, -1);
+	\draw[-|, red, ultra thick] (1.46, -1.2) 
+		.. controls (2.3, -1.5) .. (2.8, -1);
+		
+	\draw[-|, red, ultra thick] (1, -1.333) -- (0.45, -1.95);
+	\draw[-|, red, ultra thick] (1.3, -1.333) -- (1.85, -1.95);
+	
+\end{tikzpicture}
+\caption{Example of Markov blanket. The Markov blanket consists
+of children, parents and parents of children. Given the Markov
+blanket, all information flow is blocked.}
+\label{fig:exmpl_markov_blanket}
+\end{figure}
+
+\noindent
+\begin{defn}[Markov blanket]
+The Markov blanket $B_m(X_i)$ of a node $X_i$ in a Bayesian network
+$(G, \Theta)$ over random variables $\textbf{X}=\{X_1, \dots, X_k\}$ 
+is defined as:
+\begin{equation}
+B_m(X_i) = \Bigg(\bigcup_{u \in C(X_i)} Pa(u) \Bigg) \cup Pa(X_i) \cup C(X_i)
+	\setminus \{X_i\}
+\end{equation}
+\end{defn}
+
+\noindent
+A nice property of the Markov blanket is the following:
+\begin{prop}
+Given a Bayesian network $(G, \Theta)$ over $\textbf{X}=\{X_1, 
+\dots, X_k\}$, then the conditional probability distribution
+of $X_i$ given all other variables $\textbf{X}\setminus \{X_i\}$
+is equal to the conditional distribution of $X_i$ given the 
+Markov blanket.
+\begin{equation}
+p( X_i \mid X_{j \neq i}) = p(X_i \mid M_b(X_i))
+\end{equation}
+\end{prop}
+
+\begin{proof}
+The proof is straight forward:
+\begin{equation}\begin{split}
+p(X_i \mid X_{j \neq i}) 
+	&= \frac{p(\textbf{X})}{p(X_{j \neq i})}\\
+	&= \frac{\prod_{l=1}^{k}p(X_l \mid Pa(X_l))}
+		{\int_{X_i} \prod_{l=1}^{k}p(X_l \mid Pa(X_l))dX_i}
+\end{split}\end{equation}
+In the denominator, we can pull out any terms which do not
+contain $X_i$. We define the following sets for ease of notation:
+\vspace{-1em}
+\begin{multicols}{2}
+\begin{equation}\begin{split}
+I_b &= C(X_i) \cup \{X_i\}\\
+N_b &= V \setminus I_b\\
+\end{split}\end{equation}\break
+\begin{equation}\begin{split}
+S &= \bigcup_{v \in I_b} Pa(v) \\
+S' &= \bigcup_{v \in N_b} Pa(v) \\
+\end{split}\end{equation}
+\end{multicols}
+
+\noindent
+We can then re-write the previous equation:
+\begin{equation}\begin{split}
+p(X_i \mid X_{j \neq i}) 
+	&= \frac{\prod_{l=1}^{k}p(X_l \mid Pa(X_l))}
+		{\int_{X_i} \prod_{l=1}^{k}p(X_l \mid Pa(X_l))dX_i}\\
+	&= \frac{\prod_{u \in N_b}p(u \mid Pa(u))
+			 \prod_{v \in I_b}p(v \mid Pa(v))}
+			{\prod_{u \in N_b}p(u \mid Pa(u))
+			 \int_{X_i} \prod_{v \in I_b}p(v \mid Pa(v))dX_i}\\
+	&= \frac{p(N_b \mid S' \setminus N_b)}
+			{p(N_b \mid S' \setminus N_b)}
+	   \frac{p(I_b \mid S \setminus I_b)}
+			{\int_{X_i}p(I_b \mid S\setminus I_b)dX_i}\\
+	&= \frac{p(I_b \mid S \setminus I_b)}
+			{\int_{X_i}p(I_b \mid S \setminus I_b)dX_i}\\
+	&= p(X_i \mid S \setminus I_b \cup I_b \setminus \{X_i\})\\
+	&= p(X_i \mid S \cup I_b \setminus \{X_i\})
+\end{split}\end{equation}
+We are left to prove that $B_m(X_i) = S \setminus \{X_i\}$:
+\begin{equation}\begin{split}
+S \cup I_b \setminus \{X_i\} 
+	&= \Bigg(\bigcup_{v \in C(X_i) \cup \{X_i\}} Pa(v) \Bigg) 
+		\cup I_b \setminus \{X_i\}\\
+	&= \Bigg(\bigcup_{v \in C(X_i)} Pa(v) \cup Pa(X_i) \Bigg) 
+		\cup C(X_i) \cup \{X_i\} \setminus \{X_i\}\\
+	&= \Bigg(\bigcup_{u \in C(X_i)} Pa(u) \Bigg) \cup Pa(X_i) \cup C(X_i)
+		\setminus \{X_i\}
+\end{split}\end{equation}
+We conclude that $p(X_i \mid X_{j\neq i}) = p(X_i \mid M_b(X_i))$.
+\end{proof}
+
+\section{Exact inference in Bayesian networks}
+
+\section{Approximate inference in Bayesian networks}
