@@ -1234,6 +1234,315 @@ S \cup I_b \setminus \{X_i\}
 We conclude that $p(X_i \mid X_{j\neq i}) = p(X_i \mid M_b(X_i))$.
 \end{proof}
 
+\section{Constructing Bayesian networks}
+Talk about variable ordering, give an example.
+
 \section{Exact inference in Bayesian networks}
+We've seen Bayesian networks and how they are quite useful.
+In the previous sections on conditional independence, D-separation
+and Markov blankets we've mentioned that these propertied are very
+useful in performing inference. Especially the Markov blanket, which
+suffices to compute the conditional probability distribution for 
+any variable $X_i$. This reduces computation time considerably.
+However, it remains a \# P-complete problem. We are after all
+summing over an exponential number of configurations.
+\\\\
+Several exact inference techniques exists. One of them makes 
+use of dynamic programming and is referred to as variable 
+elimination. Here, one makes smart use of previous computations
+to avoid redundant computations. Variable elimination is the most
+straight forward exact inference algorithm.
+\\\\
+The second form of exact inference we will discuss in this section
+is one based on message passing. As we will see, this algorithm
+is efficient and exact for a subset of Bayesian networks.
+The algorithm works for general Bayesian networks, however
+is not efficient. This algorithm is referred to as the 
+\textit{sum-product} algorithm or \textit{Belief propagation}.
+Before we go into belief propagation, however, we need to 
+first consider an abstraction of Bayesian networks in the 
+form of factor graphs.
+
+\subsection{Variable elimination}
+Variable elimination is in a sense just a fancy name for dynamic
+programming and caching computation in Bayesian networks. Let's look
+at an example of finding the marginal probability of node $E$ in
+the Bayesian network iin figure \ref{fig:BN_exmpl_dsep}:
+\begin{equation}\begin{split}
+p(E) 
+	&= \sum_{a,b,c,d} P(a, b, c, d, E)\\
+	&= \sum_{a,b,c,d} p(a)p(b)p(c \mid a, b)p(d \mid c, b)p(E \mid c, d)\\
+\end{split}\end{equation}
+If we were to calculate the probability in this fashion, we would
+take a sum over $|A||B||C||D| = k^4$ values. Here $|X|$ denotes the
+amount of values $X$ can assume, i.e. $|\Omega_X|$. We assume the 
+outcome space of each variable to be $k$. Clearly, in larger networks
+this would not scale. We can, however, massage the equation a bit 
+to win in computation time. We demonstrate as follows:
+\begin{equation}\label{eq:var_elim_derv}\begin{split}
+p(E) 
+	&= \sum_{a,b,c,d} p(a)p(b)p(c \mid a, b)p(d \mid c, b)p(E \mid c, d)\\
+	&= \sum_{b,c,d} p(b)p(d \mid c, b)p(E \mid c, d)
+			\sum_a p(a)p(c \mid a, b)\\
+	&= \sum_{c, d} p(E \mid c, d)\sum_b p(b)p(d \mid c, b)
+			\sum_a p(a)p(c \mid a, b)\\
+\end{split}\end{equation}
+You might be wondering why doing this is useful at all. Let's 
+investigate further. The summation over $A$ is a sum over $k$ 
+variables. Next we sum over $B$, which is again a summation over
+$k$ variables. Finally, we sum over $k^2$ values. In total we
+have summed over $2k + k^2$ values. While it might not seem like
+much, this is a considerable amount of savings in larger Bayesian 
+networks. In order to understand better what's happening exactly,
+figure \ref{fig:visual_var_elim} $\sum_a p(a)(c \mid a, b)$ 
+assuming that each variable can take values of $0$ and $1$. 
+\begin{figure}[h!]
+\centering
+
+\definecolor{a1}{rgb}{0.8, 0.9, 1}
+\definecolor{a0}{rgb}{0.99, 0.76, 0.9}
+\definecolor{mustard}{rgb}{1.0, 0.86, 0.35}
+\definecolor{magicmint}{rgb}{0.67, 0.94, 0.82}
+\definecolor{cream}{rgb}{1.0, 0.99, 0.82}
+\definecolor{amber}{rgb}{1.0, 0.13, 0.32}
+\scalebox{0.8}{
+\begin{tikzpicture}
+	\node[] (A) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $p(a)$ \\
+		\hline
+		\begin{tabular}{l|l}
+		$a$ & $p_a$ \\
+		\hline
+		\rowcolor{a0} 0 & $a_0$ \\
+		\rowcolor{a1} 1 & $a_1$ \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}
+	};
+	
+
+	\node[] (pcab) at (0, -3.5) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $p(c \mid b, a)$ \\
+		\hline
+		\begin{tabular}{lll|l}
+		$b$ & $c$ & $a$ & $p_c$ \\
+		\hline
+		\rowcolor{a0}  0 & 0 & 0 & $p_1$ \\
+		\rowcolor{a1}  0 & 0 & 1 & $p_2$ \\
+		\rowcolor{a0}  0 & 1 & 0 & $p_3$ \\
+		\rowcolor{a1}  0 & 1 & 1 & $p_4$ \\
+		\rowcolor{a0}  1 & 0 & 0 & $p_5$ \\
+		\rowcolor{a1}  1 & 0 & 1 & $p_6$ \\
+		\rowcolor{a0}  1 & 1 & 0 & $p_7$ \\
+		\rowcolor{a1}  1 & 1 & 1 & $p_8$ \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}
+	};
+	
+	\node[] (prod) at (5.2, -1.87) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $p(c \mid b, a)p(a)$ \\
+		\hline
+		\begin{tabular}{lll|l}
+		$b$ & $c$ & $a$ & $p_cp_a$ \\
+		\hline
+		\rowcolor{cream}  0 & 0 & 0 & $p_1*a_0$ \\
+		\rowcolor{cream}  0 & 0 & 1 & $p_2*a_1$ \\
+		\rowcolor{amber}  0 & 1 & 0 & $p_3*a_0$ \\
+		\rowcolor{amber}  0 & 1 & 1 & $p_4*a_1$ \\
+		\rowcolor{mustard}  1 & 0 & 0 & $p_5*a_0$ \\
+		\rowcolor{mustard}  1 & 0 & 1 & $p_6*a_1$ \\
+		\rowcolor{magicmint}  1 & 1 & 0 & $p_7*a_0$ \\
+		\rowcolor{magicmint}  1 & 1 & 1 & $p_8*a_1$ \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}
+	};
+	
+	\node[] (sm) at (11.2, -1.95) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $\sum_ap(c \mid b, a)p(a)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		$b$ & $c$ & $p_cp_a$ \\
+		\hline
+		\rowcolor{cream}  0 & 0 & $p_1*a_0 + p_2*a_1$ \\
+		\rowcolor{amber}  0 & 1 & $p_3*a_0 + p_4*a_1$ \\
+		\rowcolor{mustard}  1 & 0 & $p_5*a_0 + p_6*a_1$ \\
+		\rowcolor{magicmint}  1 & 1 & $p_7*a_0 + p_8*a_1$ \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}
+	};
+	
+	\node[draw, circle] (times) at (2.5, -2){$\times$};
+	\node[draw, circle] (plus) at (8, -2){$\sum$};
+	
+	\draw[->] (A) -- (times);
+	\draw[->] (pcab) -- (times);
+	\draw[->] (times) -- (prod);
+	\draw[->] (prod) -- (plus);
+	\draw[->] (plus) -- (sm);
+\end{tikzpicture}
+}
+\caption{Visualization of $\sum_a p(a)p(c\mid b, a)$.}
+\label{fig:visual_var_elim}
+\end{figure}
+
+\noindent
+In fact, $\sum_a p(a)p(c \mid b, a)$ is very similar as a
+local conditional probability. It consists of table, where each
+possible configuration of $b$ and $c$ are mapped to a value.
+While the local conditional probabilities sum up to $1$,
+it does not have to be the case for $\sum_a p(a)p(c \mid b,a)$.
+We will denote $\sum_a p(a) p(c\mid b, a)$ as $f_1(b, c)$ and 
+continue:
+\begin{equation}\begin{split}
+p(E) 
+	&= \sum_{c, d} p(E \mid c, d)
+		\underbrace{\sum_b p(b)p(d \mid c, b)f_1(b, c)}_{f_2(d, c)}\\
+	&= \sum_{c, d} p(E \mid c, d)f_2(d, c)\\
+	&= f_3(E)
+\end{split}\end{equation}
+
+\noindent
+By recursively pushing the sum into the product we create 
+a computation tree as in figure \ref{fig:comp_tree_var_elim}.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+
+	\node[](pa) at (0,0) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $p(a)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](pcab) at (2,0) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray} $p(c \mid a, b)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](f1) at (1,1.7) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$f_1(b, c)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](pb) at (3,1.7) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$p(b)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](pdcb) at (5,1.7) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$p(d \mid c, b)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](f2) at (3,3.4) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$f_2(c,d)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](pecd) at (5.1,3.4) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$p(E \mid c, d)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\node[](pe) at (4,5.1) {
+		\begin{tabular}{|c|}
+		\hline
+		\rowcolor{lightgray}$p(E)$ \\
+		\hline
+		\begin{tabular}{ll|l}
+		& \vdots & \\
+		\end{tabular}\\
+		\hline
+		\end{tabular}			
+	};
+	
+	\draw[->, thick] (pa.north) -- (f1.265);
+	\draw[->, thick] (pcab.north) -- (f1.295);
+	
+	\draw[->, thick] (f1.north) -- (f2.250);
+	\draw[->, thick] (pb.north) -- (f2);
+	\draw[->, thick] (pdcb.north) -- (f2.295);
+	
+	\draw[->, thick] (f2.north) -- (pe.265);
+	\draw[->, thick] (pecd.north) -- (pe.295);
+\end{tikzpicture}
+\caption{The computation tree for variable ordering $a, b, c, d$.}
+\label{fig:comp_tree_var_elim}
+\end{figure}
+
+\noindent
+From equation \ref{eq:var_elim_derv} one might observe that this
+is not the only way one could \textit{push} the sum into the product.
+In the case of equation \ref{eq:var_elim_derv} the order in which
+we pushed the sum into the product is $a$, $b$ then $c$ and $d$.
+Note that this variable order might not be optimal to reduce the
+computational time. In fact, the computation tree from figure 
+\ref{fig:comp_tree_var_elim} might look wildly different depending
+on the variable order. A good one might reduce complexity tremendously,
+a bad ordering might result in no gain.
+
+\subsection{Factor graphs}
+\subsection{Sum-product}
 
 \section{Approximate inference in Bayesian networks}
+\subsection{Sampling methods}
