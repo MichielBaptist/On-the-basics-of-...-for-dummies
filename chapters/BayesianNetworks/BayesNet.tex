@@ -1238,13 +1238,13 @@ We conclude that $p(X_i \mid X_{j\neq i}) = p(X_i \mid M_b(X_i))$.
 Talk about variable ordering, give an example.
 
 \section{Exact inference in Bayesian networks}
-We've seen Bayesian networks and how they are quite useful.
+We've seen Bayesian networks and argues their usefulness.
 In the previous sections on conditional independence, D-separation
-and Markov blankets we've mentioned that these propertied are very
+and Markov blankets we've mentioned that these properties are very
 useful in performing inference. Especially the Markov blanket, which
 suffices to compute the conditional probability distribution for 
 any variable $X_i$. This reduces computation time considerably.
-However, it remains a \# P-complete problem. We are after all
+However, it remains a \# P-complete problem. We are after all,
 summing over an exponential number of configurations.
 \\\\
 Several exact inference techniques exists. One of them makes 
@@ -1256,18 +1256,20 @@ straight forward exact inference algorithm.
 The second form of exact inference we will discuss in this section
 is one based on message passing. As we will see, this algorithm
 is efficient and exact for a subset of Bayesian networks.
-The algorithm works for general Bayesian networks, however
-is not efficient. This algorithm is referred to as the 
+While the algorithm works for general Bayesian networks, it
+is not efficient in the general case. 
+This algorithm is referred to as the 
 \textit{sum-product} algorithm or \textit{Belief propagation}.
-Before we go into belief propagation, however, we need to 
-first consider an abstraction of Bayesian networks in the 
-form of factor graphs.
+Before we go into sum-product, however, we need to 
+first consider factor graphs. Factor graphs are a graphical  
+representation of a factorization of a function over multiple 
+variables.
 
 \subsection{Variable elimination}
 Variable elimination is in a sense just a fancy name for dynamic
 programming and caching computation in Bayesian networks. Let's look
 at an example of finding the marginal probability of node $E$ in
-the Bayesian network iin figure \ref{fig:BN_exmpl_dsep}:
+the Bayesian network in figure \ref{fig:BN_exmpl_dsep}:
 \begin{equation}\begin{split}
 p(E) 
 	&= \sum_{a,b,c,d} P(a, b, c, d, E)\\
@@ -1542,7 +1544,142 @@ on the variable order. A good one might reduce complexity tremendously,
 a bad ordering might result in no gain.
 
 \subsection{Factor graphs}
-\subsection{Sum-product}
+In this section, we introduce factor graphs. Factor graphs are
+very similar to Bayesian networks, in the sense that they are
+a graphical representation of a factorization of a function. 
+In the case of Bayesian networks, we factorize $p(\textbf{X})$
+using local conditional probabilities $p(X_i \mid Pa(X_i))$.
+In Bayesian networks, each node in the DAG had exactly one
+local conditional probability associated with it. 
+In factor graphs, however, we have a set $F=\{f_1, \dots, f_k\}$
+of factors. Each factor $f_i$ is defined over a subset of the variables
+in the original function.
 
+\begin{defn}[Factor graph]
+A factor graph over $\textbf{X}= \{X_1, \dots, X_n\}$ for function
+$f(\textbf{X})$ is a set of factors $F=\{f_1, \dots, f_k\}$, where
+each factor $f_i$ is defined for a subset of $\textbf{X}$. For a factor
+graph it holds that:
+\begin{equation}
+f(\textbf{X}) = \prod_{f_i\in F} f_i(\textbf{X}_i)
+\end{equation}
+\end{defn}
+
+\noindent
+In this definition, $\textbf{X}_i$ denotes the subset of
+$\textbf{X}$ over which $f_i$ is defined.
+Another similarity with Bayesian networks is the encoding of 
+conditional independence. Indeed, conditional independence
+in Bayesian networks is encoded by a DAG. By the fact that
+the factors $f_i$ are defined over a subset of $\textbf{X}$,
+we implicitly leverage structure of our function $f(\textbf{X})$.
+
+\begin{exmp}
+Let us consider the joint probability function defined by
+the Bayesian network in figure \ref{fig:BN_exmpl_dsep}. Figure
+\ref{fig:BN_to_factor} on the left shows this Bayesian network.
+We can re-write the Bayesian network over $\textbf{X} = \{
+A, B, C, D, E\}$ as a factor graph. Indeed, consider $p(\textbf{X})
+= f(\textbf{X})$, we factorize:
+\begin{equation}\label{eq:bn_to_factor}\begin{split}
+p(A,B,C,D,E) 
+	&= p(A)p(B)p(C \mid A, B)p(D \mid C, B)p(E \mid C, D)\\
+	&= f_1(A)f_2(B)f_3(A, B, C)f_4(B, C, D)f_5(C, D, E)
+\end{split}\end{equation}
+How trivial this derivation seems, it shows that any Bayesian
+network $(G, \Theta)$ is already by default a factor graph where
+$F = \Theta$ for the join distribution $p(\textbf{X})$. However,
+not every factor graph is a Bayesian network. Looking at 
+\ref{eq:bn_to_factor} we notice that this is not the only way
+we could transform the Bayesian network into a factor graph.
+Take for example:
+\begin{equation}\begin{split}
+p(A,B,C,D,E) 
+	&= \underbrace{f_1(A)f_2(B)f_3(A, B, C)}_{= f_1(A,B,C)}
+			f_4(B, C, D)f_5(C, D, E) \\
+	&= f_1(A,B,C)f_4(B, C, D)f_5(C, D, E) \\
+\end{split}\end{equation}
+This is also a factor graph over $\textbf{X}$ for $p(\textbf{X})$. 
+Thus, there are many factor graphs for a given Bayesian network,
+depending on which factors are taken together. We draw factor graphs
+in a very similar fashion as Bayesian networks. Figure 
+\ref{fig:BN_to_factor} shows the Bayesian network transformed into
+a factor graph. Variables in a factor graph are represented by a 
+circle node. Factors are represented as squares, if there is an edge
+between a factor and a variable, the factor uses this variable.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}
+	
+	\node [draw, circle] (A) at (0,0){$A$};
+	\node [draw, circle] (B) at (2,0){$B$};
+	\node [draw, circle,] (C) at (1,-1){$C$};
+	\node [draw, circle] (E) at (1,-2){$E$};
+	\node [draw, circle] (D) at (2.2,-1.7){$D$};
+	
+	\draw[->] (A) -- (C);
+	\draw[->] (B) -- (C);
+	\draw[->] (B) -- (D);
+	\draw[->] (C) -- (E);
+	\draw[->] (C) -- (D);
+	\draw[->] (D) -- (E);
+	
+	
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}
+	\node [draw=red, rectangle, 
+		   fill=red, label=above:{$f_1$}] (f1) at (-1,1){};
+	\node [draw, circle](A) at (0, 0){$A$};
+	\node [draw, circle] (B) at (2,0){$B$};
+	\node [draw=red, rectangle, 
+		   fill=red, label=above:{$f_2$}] (f2) at (3,1){};
+		   
+	\node [draw, circle,] (C) at (1,-1.5){$C$};
+	\node [draw=red, rectangle, 
+		   fill=red, label=above:{$f_3$}] (f3) at (1,-0.6){};
+		   
+	\node [draw, circle] (D) at (3,-1.5){$D$};
+	\node [draw, circle] (E) at (2,-3){$E$};
+	
+	\node [draw=red, rectangle, 
+		   fill=red, label=20:{$f_4$}] (f4) at (2,-1.2){};
+		   
+	\node [draw=red, rectangle, 
+		   fill=red, label=above:{$f_5$}] (f5) at (2,-2.2){};
+		   
+	\draw[-] (f1) -- (A);
+	\draw[-] (f2) -- (B);
+	
+	\draw[-] (f3) -- (A);
+	\draw[-] (f3) -- (B);
+	\draw[-] (f3) -- (C);
+	
+	\draw[-] (f4) -- (D);
+	\draw[-] (f4) -- (B);
+	\draw[-] (f4) -- (C);
+	
+	\draw[-] (f5) -- (D);
+	\draw[-] (f5) -- (E);
+	\draw[-] (f5) -- (C);
+\end{tikzpicture}
+\end{minipage}
+\caption{Example of a Bayesian network transformed into a
+factor graph.}
+\label{fig:BN_to_factor}
+\end{figure}
+
+\noindent
+The factor graph as seen in figure \ref{fig:BN_to_factor} is a bipartite
+graph. The factors do not have edges between other factors. The same holds
+for variable nodes. This will play an important role in 
+\end{exmp}
+\subsection{Sum-product}
+We will discuss the sum-product algorithm in context of Bayesian
+networks over discrete variables. However, the algorithm does generalize
+to continuous variables.
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
