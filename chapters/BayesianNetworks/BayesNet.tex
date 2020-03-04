@@ -1563,6 +1563,25 @@ graph it holds that:
 \begin{equation}
 f(\textbf{X}) = \prod_{f_i\in F} f_i(\textbf{X}_i)
 \end{equation}
+A factor graph is visually represented as a undirected bipartite graph
+$G = (V, E)$ consisting of two node types as in figure 
+\ref{fig:BN_to_factor} on the right.
+The vertices are partitioned into factor nodes $F$ and variable 
+nodes $\textbf{X}$, $V = \textbf{X}\cup F$. Factor nodes are 
+depicted by a red square and variable nodes depicted by a black
+circle containing the variable. Variable nodes only have edges to
+factor nodes and vice versa. A factor node is connected to a variable
+node if the factor includes this variable:
+\begin{equation}
+\forall X \in \textbf{X}, \forall f_i \in F: (X, f_i) 
+	\in E \Leftrightarrow X \in \textbf{X}_i 
+\end{equation}
+As factor graphs are undirected, the edge set $E$ is symmetric. 
+This means that if there is an edge from $X$ to $f_i$ there is
+also an edge from $f_i$ to $X$:
+\begin{equation}
+\forall v, u \in V: (v, u) \in E \Leftrightarrow (u, v) \in E
+\end{equation}
 \end{defn}
 
 \noindent
@@ -1604,9 +1623,7 @@ Thus, there are many factor graphs for a given Bayesian network,
 depending on which factors are taken together. We draw factor graphs
 in a very similar fashion as Bayesian networks. Figure 
 \ref{fig:BN_to_factor} shows the Bayesian network transformed into
-a factor graph. Variables in a factor graph are represented by a 
-circle node. Factors are represented as squares, if there is an edge
-between a factor and a variable, the factor uses this variable.
+a factor graph.
 
 \begin{figure}[h!]
 \centering
@@ -1675,11 +1692,27 @@ factor graph.}
 \noindent
 The factor graph as seen in figure \ref{fig:BN_to_factor} is a bipartite
 graph. The factors do not have edges between other factors. The same holds
-for variable nodes. This will play an important role in 
+for variable nodes. This will play an important role in the sum-product
+algorithm.
 \end{exmp}
+
+\noindent
+We conclude the section on factor graphs by defining what is
+meant by the neighbors of a node. In the sum-product algorithm
+the neighborhood plays an important role.
+\begin{defn}[Neighbors in a factor graph]
+Given a factor graph $G = (V, E)$, the neighbors $N(X)$ of a node 
+$X \in V$ are defined as all the nodes for which there is a 
+connecting edge:
+\begin{equation}
+N(X) = \{v \in V \mid (v, X) \in E\}
+\end{equation}
+\end{defn}
+
+
 \subsection{Sum-product}
 We will discuss the sum-product algorithm in context of Bayesian
 networks over discrete variables. However, the algorithm does generalize
-to continuous variables.
+to continuous variables. 
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
