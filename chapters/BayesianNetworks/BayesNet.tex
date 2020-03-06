@@ -1924,6 +1924,41 @@ in figure \ref{fig:messages_to_variable}.
 Note, the sum may be pushed into the product
 because the sub-graphs $S(X)$ have no overlapping vertices.
 
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[fn, label=above:{$f_2$}](f2) at (0,2){};
+	\node[fn, label=above:{$f_1$}](f1) at (0,0){};
+	\node[fn, label=above:{$f_n$}](f3) at (4,1){};
+	
+	\node[vn](X) at (2, 1){$X$};
+	
+	\node[](dots) at (2, 2){$\dots$};
+	
+	\draw[-](f1) -- (X);
+	\draw[-](f2) -- (X);
+	\draw[-](f3) -- (X);
+	
+	\draw[->,blue, ultra thick, sloped] (0.3, 0.35) -- 
+		node[above]{$\mu_{f_1 \rightarrow X}$} (1.5, 0.95);
+	\draw[->,blue, ultra thick, sloped] (0.3, 2.05) -- 
+		node[above]{$\mu_{f_2 \rightarrow X}$} (1.5, 1.45);
+	\draw[->,blue, ultra thick, sloped] (3.7, 1.2) -- 
+		node[above]{$\mu_{f_m \rightarrow X}$} (2.5, 1.2);
+\end{tikzpicture}
+\caption{Messages passed from factor nodes $f_i$ to
+a variable node $X$.}
+\label{fig:messages_to_variable}
+\end{figure}
+
+\noindent
+
+
 
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
