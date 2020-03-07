@@ -1804,7 +1804,7 @@ in the factor graph, by definition of factor graphs. However, let
 us first partition the factor set $F$. We partition the factors
 by considering $X$ as the root node. The partition is then formed
 by the factor nodes contained in each sub-tree.
-To be more concrete, consider $S(X) = \{G_1, \dots, Gm\}$ the set
+To be more concrete, consider $S_G(X) = \{G_1, \dots, Gm\}$ the set
 of sub trees $G_i = ( V_i \cup F_i, E_i)$ starting at neighbor 
 $f_i \in N(X)$. Figure
 \ref{fig:factor_subtrees} shows what this means for general factor graphs.
@@ -1812,8 +1812,8 @@ We then partition the set of factors $F$ into the factor sets $F_i$
 contained in each sub-tree $G_i$. 
 
 \begin{equation}\begin{split}
-\bigcup_{G_i \in S(X)} F_i &= F\\
-\bigcap_{G_i \in S(X)} F_i &= \emptyset \\
+\bigcup_{G_i \in S_G(X)} F_i &= F\\
+\bigcap_{G_i \in S_G(X)} F_i &= \emptyset \\
 \end{split}\end{equation}
 \begin{figure}[h!]
 \centering
@@ -1879,7 +1879,7 @@ contained in each sub-tree $G_i$.
 		.. (1.5, -2.5);
 	\node[](G1) at (-0.4, -1.5){$G_4$};
 \end{tikzpicture}
-\caption{Visualization of what is meant by $S(X)$ and $F_i$. Note
+\caption{Visualization of what is meant by $S_G(X)$ and $F_i$. Note
 that $G_i$ is \textbf{not} a factor graph. This would require 
 $X \in F_i \cup V_i$.}
 \label{fig:factor_subtrees}
@@ -1898,21 +1898,33 @@ Using the partition of $F$, we re-write $f(\textbf{X})$ from equation
 \begin{equation}\begin{split}
 f(\textbf{X}) 
 	&= \prod_{f_i \in F} f_i(\textbf{X}_i) \\
-	&= \prod_{G_i \in S(X)}\prod_{f_i \in F_i} f_i(\textbf{X}_i)\\
-	&= \prod_{G_i \in S(X)}F_i(X, V_i)
+	&= \prod_{G_i \in S_G(X)}\prod_{f_j \in F_i} f_j(\textbf{X}_j)\\
+	&= \prod_{G_i \in S_G(X)}F_i(X, V_i)
 \end{split}\end{equation}
 
 \noindent
 Where $F_i(X, V_i)$ is defined as the product of
-all factors in the set $F_i$. Recall that $V_i$ is the set of vertices
+all factors in the set $F_i$:
+
+\begin{equation}
+\label{eq:Fdef}
+F_i(X, V_i) = \prod_{f_j \in F_i} f_j(\textbf{X}_j)
+\end{equation} 
+
+\noindent
+Note that $\textbf{X}_j$ is the set random variables over which
+$f_i$ is defined. Since $\bigcup_{f_j} \textbf{X}_j = V_i \cup \{X\}$,
+all the variables needed to define the $F_i(X, V_i)$ are 
+$V_i$ and $X$ itself.
+Recall that $V_i$ is the set of vertices
 of sub graph $G_i$. We now plug in this result into equation
 \ref{eq:factor_marg} and push the sum into the product:
 
-\begin{equation}\begin{split}
+\begin{equation}\label{eq:mudef}\begin{split}
 p(\textbf{X}) 
-	&= \sum_{\textbf{X}\setminus X} \prod_{G_i \in S(X)} F_i(X, V_i) \\
-	&= \prod_{G_i \in S(X)} \sum_{V_i} F_i(X, V_i) \\
-	&= \prod_{G_i \in S(X)} \mu_{f_i \rightarrow X}(X)
+	&= \sum_{\textbf{X}\setminus X} \prod_{G_i \in S_G(X)} F_i(X, V_i) \\
+	&= \prod_{G_i \in S_G(X)} \sum_{V_i} F_i(X, V_i) \\
+	&= \prod_{G_i \in S_G(X)} \mu_{f_i \rightarrow X}(X)
 \end{split}\end{equation}
 
 \noindent
@@ -1922,7 +1934,7 @@ from factor $f_i$ to variable $X$. The marginal $p(X)$ is then
 defined as the product of all incoming messages as displayed
 in figure \ref{fig:messages_to_variable}.
 Note, the sum may be pushed into the product
-because the sub-graphs $S(X)$ have no overlapping vertices.
+because the sub-graphs $S_G(X)$ have no overlapping vertices.
 
 \begin{figure}[h!]
 \centering
@@ -1944,11 +1956,11 @@ because the sub-graphs $S(X)$ have no overlapping vertices.
 	\draw[-](f2) -- (X);
 	\draw[-](f3) -- (X);
 	
-	\draw[->,blue, ultra thick, sloped] (0.3, 0.35) -- 
+	\draw[->,blue, ultra thick, sloped, opacity=0.5] (0.3, 0.35) -- 
 		node[above]{$\mu_{f_1 \rightarrow X}$} (1.5, 0.95);
-	\draw[->,blue, ultra thick, sloped] (0.3, 2.05) -- 
+	\draw[->,blue, ultra thick, sloped, opacity=0.5] (0.3, 2.05) -- 
 		node[above]{$\mu_{f_2 \rightarrow X}$} (1.5, 1.45);
-	\draw[->,blue, ultra thick, sloped] (3.7, 1.2) -- 
+	\draw[->,blue, ultra thick, sloped, opacity=0.5] (3.7, 1.2) -- 
 		node[above]{$\mu_{f_m \rightarrow X}$} (2.5, 1.2);
 \end{tikzpicture}
 \caption{Messages passed from factor nodes $f_i$ to
@@ -1957,7 +1969,161 @@ a variable node $X$.}
 \end{figure}
 
 \noindent
+All we have left to do is compute these messages 
+$\mu_{f_i \rightarrow X}$ in order to compute the marginal $p(X)$.
+Looking back at the definition of $\mu_{f_i \rightarrow X}$ and 
+$F_i(X, V_i)$ from equations \ref{eq:mudef} and \ref{eq:Fdef}
+we compute:
 
+\begin{equation}\label{eq:message_decomp}\begin{split}
+\mu_{f_i \rightarrow X} 
+	&= \sum_{V_i}\prod_{f_j \in F_i} f_j(\textbf{X}_i) \\
+	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{f_j \in F_i \setminus \{f_i\}} f_j(\textbf{X}_j)\\
+\end{split}\end{equation}
+
+\noindent
+The product $\prod_{f_j} f_j(\textbf{X}_j)$ is simply the product
+of all factors in $G_i$ except for $f_i$. Just as we've done previously
+we can create a partition of the factors $F_i \setminus \{f_i\}$.
+We again do this based on the sub-trees of $f_i$, except for the 
+sub-tree going through variable node $X$. Figure \ref{fig:subtree_fi}
+shows the recursive partitioning of $F_i\setminus \{X\}$ in $G_i$.
+
+\begin{figure}[h!]
+\centering
+
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[vn](X) at (0,0){$X$};
+	\node[fn, label=right:{$f_i$}] (fi) at (0, -1){};
+	
+	\node[vn](Xi1) at (-1.6, -3) {$X_{i1}$};
+	\node[](dots1) at (0, -3) {$\dots$};
+	\node[vn](Xim) at (1.6, -3) {$X_{im}$};
+	
+	\node[fn, label=below:{$f_{i11}$}](fi11) at (-3, -5){};
+	\node[] (dots2) at (-2, -5){$\dots$};
+	\node[fn, label=below:{$f_{i1k}$}](fi1k) at (-1, -5){};
+	
+	\node[fn, label=below:{$f_{im1}$}](fim1) at (1, -5){};
+	\node[] (dots3) at (2, -5){$\dots$};
+	\node[fn, label=below:{$f_{imk'}$}](fimk2) at (3, -5){};
+	
+	\draw[-] (X) -- (fi);
+	\draw[-] (fi) -- (Xi1);
+	\draw[-] (fi) -- (Xim);
+	
+	\draw[-] (Xi1) -- (fi11);
+	\draw[-] (Xi1) -- (fi1k);
+	
+	\draw[-] (Xim) -- (fim1);
+	\draw[-] (Xim) -- (fimk2);
+	
+	\draw[rounded corners, ultra thick, gray] 
+		(0, -0.5) --
+		(0.8, -0.5) --
+		(4.3, -5) --
+		(4.3, -6) --
+		(-4.3, -6) --
+		(-4.3, -5) -- 
+		(-0.8, -0.5) --
+		(0, -0.5);
+	\node[text = gray](Gi) at (-0.8, -1){$G_i$};
+	
+	\draw[rounded corners, ultra thick, blue, opacity=0.3] 
+		(-1.8, -2.4) --
+		++(0.8, 0) --
+		++(0.4, -3.3) --
+		++(-3, 0) --
+		++(0, 0.8) --
+		(-2.1, -2.4) --
+		(-1.8, -2.4);
+	\node[text = blue, opacity = 0.3](Gi1) at (-2.3, -3.5){$G_{i1}$};
+	
+	\draw[rounded corners, ultra thick, blue, opacity=0.3] 
+		(1.8, -2.4) --
+		++(-0.8, 0) --
+		++(-0.4, -3.3) --
+		++(3, 0) --
+		++(0, 0.8) --
+		(2.1, -2.4) --
+		(1.8, -2.4);
+	\node[text = blue, opacity = 0.3](Gi1) at (2.4, -3.5){$G_{im}$};
+	
+\end{tikzpicture}
+
+\caption{Recursively partitioning of $F_i \setminus \{X\}$ in $G_i$.}
+\label{fig:subtree_fi}
+\end{figure}
+
+\noindent
+The result is the partition of the factors according to the
+sub graphs of $f_i$ without considering the sub graph containing $X$,
+$S_{G_i}(f_i) = \{G_{i1}, \dots, G_{im}\}$. Where each sub graph is
+defined as $G_{ij} = (V_{i,j} \cup F_{ij}, E_{i,j})$, and it 
+again holds that:
+
+\begin{equation}\begin{split}
+\bigcup_{G_{ij} \in S_{G_i}(f_i)} F_{ij} &= F_i \\
+\bigcap_{G_{ij} \in S_{G_i}(f_i)} F_{ij} &= \emptyset
+\end{split}\end{equation}
+
+\noindent
+We can then recursively define $F_{ij}(X_{ij}, V_{ij})$
+as the product of all the factors $F_{ij}$ in sub graph $G_{ij}$:
+
+\begin{equation}\label{eq:fij}
+F_{ij}(X_{ij}, V_{ij}) = \prod_{f_{k} \in F_{ij}}f_{k}(\textbf{X}_{k})
+\end{equation}
+
+\noindent
+We continue our derivation of the messages from equation 
+\ref{eq:message_decomp} using equation \ref{eq:fij}:
+
+\begin{equation}\label{eq:message_var_to_fact_der}\begin{split}
+\mu_{f_i \rightarrow X} 
+	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{f_j \in F_i \setminus \{f_i\}} f_j(\textbf{X}_j)\\
+	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{G_{ij} \in S_{G_i}(f_i)} \prod_{f_{k} \in F_{ij} }
+			f_{k}(\textbf{X}_k)\\
+	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{G_{ij} \in S_{G_i}(f_i)} F_{ij}(X_{ij}, V_{ij})\\
+	&= \sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\sum_{V_i \setminus \textbf{X}_i}\prod_{G_{ij} \in S_{G_i}(f_i)} 
+			F_{ij}(X_{ij}, V_{ij})\\
+	&= \sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{G_{ij} \in S_{G_i}(f_i)} \sum_{V_{ij} \setminus \{X_{ij}\}}
+			F_{ij}(X_{ij}, V_{ij})\\
+	&= \sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
+		\prod_{G_{ij} \in S_{G_i}(f_i)} \mu_{X_{ij} \rightarrow f_i}(X_{ij})
+\end{split}\end{equation}
+
+\noindent
+Where we have defined $\mu_{X_{ij} \rightarrow f_i}(X_{ij})$ as:
+
+\begin{equation}\label{eq:message_var_to_fact}
+\mu_{X_{ij} \rightarrow f_i}(X_{ij}) = \sum_{V_{ij} \setminus \{X_{ij}\}}
+			F_{ij}(X_{ij}, V_{ij})
+\end{equation}
+
+\noindent
+Note that $\mu_{X_{ij} \rightarrow f_i}$ is indeed a function of
+$X_{ij}$. We are computing $p(X)$ so why should the message be 
+dependent on $X_{ij}$? Note that we are summing over $X_{ij}$ by 
+the first summation over $\textbf{X}_i \setminus \{X\}$. Let us
+take a step back and describe what exactly equation 
+\ref{eq:message_var_to_fact_der} is trying to tell us. The message
+of factor $f_i$ to variable $X$ is the product of all incoming
+messages $\mu_{X_{ij} \rightarrow f_i}$ and the factor $f_i$ itself.
+This product will result in a table, with an entry for each configuration
+of $\textbf{X}_i$. We then sum over all variables of this table
+except $X$. The message is then passed to $X$.
 
 
 \section{Approximate inference in Bayesian networks}
