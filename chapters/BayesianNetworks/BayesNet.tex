@@ -1265,7 +1265,7 @@ first consider factor graphs. Factor graphs are a graphical
 representation of a factorization of a function over multiple 
 variables.
 
-\subsection{Variable elimination}
+\section{Exact inference: Variable elimination}
 Variable elimination is in a sense just a fancy name for dynamic
 programming and caching computation in Bayesian networks. Let's look
 at an example of finding the marginal probability of node $E$ in
@@ -1543,7 +1543,7 @@ computational time. In fact, the computation tree from figure
 on the variable order. A good one might reduce complexity tremendously,
 a bad ordering might result in no gain.
 
-\subsection{Factor graphs}
+\section{Exact inference: factor graphs}
 In this section, we introduce factor graphs. Factor graphs are
 very similar to Bayesian networks, in the sense that they are
 a graphical representation of a factorization of a function. 
@@ -1710,24 +1710,25 @@ N(X) = \{v \in V \mid (v, X) \in E\}
 \end{defn}
 
 
-\subsection{Sum-product}
+\section{Exact inference: Sum-product}
 We will discuss the sum-product algorithm in context of Bayesian
 networks over discrete variables. However, the algorithm does generalize
 to continuous variables. 
-\\\\
+
+\subsection{Tree factor graphs}
 We start our discussion of the sum-product algorithm by applying it
 to a subset of factor graphs. The types of factor graphs we will 
 consider at first are the tree graphs. These factor graphs do not
 contain loops. An example of a tree structured factor graph is depicted
 in figure \ref{fig:tree_factor_graph}. Note this tree graph is not
-necessarily derived from a Bayesian network. This graph will be 
-the running example throughout this section.
+necessarily derived from a Bayesian network.
 
 \begin{figure}[h!]
 \centering
 
-\caption{The running example of a tree structured factor graph. There are
+\caption{Example of a tree structured factor graph. There are
 no loops in tree graphs.}
+\scalebox{0.83}{
 \begin{tikzpicture}
 	[
 	vn/.style={draw = black, shape = circle},
@@ -1785,17 +1786,18 @@ no loops in tree graphs.}
 	\draw[-] (f8) -- (X7);
 	
 	\draw[-] (f9) -- (X9);
-\end{tikzpicture}
+\end{tikzpicture}}
 \label{fig:tree_factor_graph}
 \end{figure}
 
-\noindent
+
+\subsection{Marginal probability $p(X)$}
 Let us consider the problem of finding the marginal probability
 of a variable $X \in \textbf{X}$, not considering evidence for now.
 Mathematically, we want to sum out all the other variables:
 
 \begin{equation}\label{eq:factor_marg}
-p(X) = \sum_{\textbf{X}\setminus X}f(\textbf{X})
+p(X) = \sum_{\textbf{X}\setminus \{X\}}f(\textbf{X})
 \end{equation}
 
 \noindent
@@ -1808,13 +1810,7 @@ To be more concrete, consider $S_G(X) = \{G_1, \dots, Gm\}$ the set
 of sub trees $G_i = ( V_i \cup F_i, E_i)$ starting at neighbor 
 $f_i \in N(X)$. Figure
 \ref{fig:factor_subtrees} shows what this means for general factor graphs.
-We then partition the set of factors $F$ into the factor sets $F_i$ 
-contained in each sub-tree $G_i$. 
 
-\begin{equation}\begin{split}
-\bigcup_{G_i \in S_G(X)} F_i &= F\\
-\bigcap_{G_i \in S_G(X)} F_i &= \emptyset \\
-\end{split}\end{equation}
 \begin{figure}[h!]
 \centering
 \begin{tikzpicture}
@@ -1885,11 +1881,27 @@ $X \in F_i \cup V_i$.}
 \label{fig:factor_subtrees}
 \end{figure}
 
+\noindent
+We then partition the set of factors $F$ into the factor sets $F_i$ 
+contained in each sub-tree $G_i$. 
+\begin{multicols}{2}
+\begin{equation}
+\bigcup_{G_i \in S_G(X)} F_i = F
+\end{equation}\break
+\begin{equation}
+\bigcap_{G_i \in S_G(X)} F_i = \emptyset 
+\end{equation}
+\end{multicols}
+
 \begin{exmp}
 Take for example $X_3$ as the root for the factor graph in
-figure \ref{fig:tree_factor_graph}. We obtain the partitions
+figure \ref{fig:tree_factor_graph}. The graph is split into
+3 sub tree graphs. We obtain the partitions
 $F = \{f_1, f_2, f_6\} \cup \{f_5, f_9\} \cup \{f_3, f_4, f_7, f_8\}$.
 \end{exmp}
+
+\pagebreak
+
 
 \noindent
 Using the partition of $F$, we re-write $f(\textbf{X})$ from equation
@@ -1936,8 +1948,17 @@ in figure \ref{fig:messages_to_variable}.
 Note, the sum may be pushed into the product
 because the sub-graphs $S_G(X)$ have no overlapping vertices.
 
+\definecolor{a1}{rgb}{0.8, 0.9, 1}
+\definecolor{a0}{rgb}{0.99, 0.76, 0.9}
+\definecolor{mustard}{rgb}{1.0, 0.86, 0.35}
+\definecolor{magicmint}{rgb}{0.67, 0.94, 0.82}
+\definecolor{cream}{rgb}{1.0, 0.99, 0.82}
+\definecolor{amber}{rgb}{1.0, 0.13, 0.32}
+
 \begin{figure}[h!]
 \centering
+
+\scalebox{1}{
 \begin{tikzpicture}
 	[
 	vn/.style={draw = black, shape = circle},
@@ -1945,30 +1966,79 @@ because the sub-graphs $S_G(X)$ have no overlapping vertices.
 	]
 	
 	\node[fn, label=above:{$f_2$}](f2) at (0,2){};
-	\node[fn, label=above:{$f_1$}](f1) at (0,0){};
-	\node[fn, label=above:{$f_n$}](f3) at (4,1){};
+	\node[fn, label=above:{$f_1$}](f1) at (0,-2){};
+	\node[fn, label=above:{$f_n$}](f3) at (8,0){};
 	
-	\node[vn](X) at (2, 1){$X$};
+	\node[vn](X) at (4, 0){$X$};
 	
-	\node[](dots) at (2, 2){$\dots$};
+	\node[](dots) at (4, 2){$\dots$};
 	
 	\draw[-](f1) -- (X);
 	\draw[-](f2) -- (X);
 	\draw[-](f3) -- (X);
 	
-	\draw[->,blue, ultra thick, sloped, opacity=0.5] (0.3, 0.35) -- 
-		node[above]{$\mu_{f_1 \rightarrow X}$} (1.5, 0.95);
-	\draw[->,blue, ultra thick, sloped, opacity=0.5] (0.3, 2.05) -- 
-		node[above]{$\mu_{f_2 \rightarrow X}$} (1.5, 1.45);
-	\draw[->,blue, ultra thick, sloped, opacity=0.5] (3.7, 1.2) -- 
-		node[above]{$\mu_{f_m \rightarrow X}$} (2.5, 1.2);
-\end{tikzpicture}
+	\draw[->,black, ultra thick, sloped, opacity=0.5, 
+			text = black, text opacity = 1, pos=0.45] (0.3, -1.65) -- 
+	node[above]{	
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X$ & $\mu_{f_1 \rightarrow X}$ \\
+		\hline
+		\rowcolor{cream} 0 & $\mu^1_0$\\
+		\rowcolor{a1} 1 & $\mu^1_1$\\
+		\hline
+		\end{tabular}	
+	} (3.5, -.08);
+	
+	
+	\draw[->,black, ultra thick, sloped, opacity=0.5, 
+			text = black, text opacity = 1, pos=0.45] (0.3, 2.05) -- 
+	node[above]{
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X$ & $\mu_{f_2 \rightarrow X}$ \\
+		\hline
+		\rowcolor{cream} 0 & $\mu^2_0$\\
+		\rowcolor{a1} 1 & $\mu^2_1$\\
+		\hline
+		\end{tabular}	
+	} (3.5, 0.47);
+	
+	\draw[->,black, ultra thick, sloped, opacity=0.5,
+			text = black, text opacity = 1, pos=0.45] (7.7, 0.2) -- 
+	node[above]{
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X$ & $\mu_{f_m \rightarrow X}$ \\
+		\hline
+		\rowcolor{cream} 0 & $\mu^m_0$\\
+		\rowcolor{a1} 1 & $\mu^m_1$\\
+		\hline
+		\end{tabular}	
+	} (4.4, 0.2);
+	
+	\node[](px) at (4, -1.5){
+	$p(X) = $
+		\begin{tabular}{|l|l|}
+		\hline
+		\rowcolor{lightgray} $X$ & $p(X)$ \\
+		\hline
+		\rowcolor{cream} 0 & $\prod_i \mu^i_0$ \\
+		\rowcolor{a1} 1 & $\prod_i \mu^i_1$ \\
+		\hline
+		\end{tabular}
+	};
+	
+	
+\end{tikzpicture}}
+
 \caption{Messages passed from factor nodes $f_i$ to
 a variable node $X$.}
 \label{fig:messages_to_variable}
 \end{figure}
 
-\noindent
+\subsection{Messages from factor $f_i$ to variable 
+	$X$: $\mu_{f_i \rightarrow X}(X)$}
 All we have left to do is compute these messages 
 $\mu_{f_i \rightarrow X}$ in order to compute the marginal $p(X)$.
 Looking back at the definition of $\mu_{f_i \rightarrow X}$ and 
@@ -1976,7 +2046,7 @@ $F_i(X, V_i)$ from equations \ref{eq:mudef} and \ref{eq:Fdef}
 we compute:
 
 \begin{equation}\label{eq:message_decomp}\begin{split}
-\mu_{f_i \rightarrow X} 
+\mu_{f_i \rightarrow X} (X)
 	&= \sum_{V_i}\prod_{f_j \in F_i} f_j(\textbf{X}_i) \\
 	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
 		\prod_{f_j \in F_i \setminus \{f_i\}} f_j(\textbf{X}_j)\\
@@ -2068,10 +2138,14 @@ $S_{G_i}(f_i) = \{G_{i1}, \dots, G_{im}\}$. Where each sub graph is
 defined as $G_{ij} = (V_{i,j} \cup F_{ij}, E_{i,j})$, and it 
 again holds that:
 
-\begin{equation}\begin{split}
-\bigcup_{G_{ij} \in S_{G_i}(f_i)} F_{ij} &= F_i \\
-\bigcap_{G_{ij} \in S_{G_i}(f_i)} F_{ij} &= \emptyset
-\end{split}\end{equation}
+\begin{multicols}{2}
+\begin{equation}
+\bigcup_{G_{ij} \in S_{G_i}(f_i)} F_{ij} = F_i 
+\end{equation}\break
+\begin{equation}
+\bigcap_{G_{ij} \in S_{G_i}(f_i)} F_{ij} = \emptyset
+\end{equation}
+\end{multicols}
 
 \noindent
 We can then recursively define $F_{ij}(X_{ij}, V_{ij})$
@@ -2116,14 +2190,152 @@ Where we have defined $\mu_{X_{ij} \rightarrow f_i}(X_{ij})$ as:
 Note that $\mu_{X_{ij} \rightarrow f_i}$ is indeed a function of
 $X_{ij}$. We are computing $p(X)$ so why should the message be 
 dependent on $X_{ij}$? Note that we are summing over $X_{ij}$ by 
-the first summation over $\textbf{X}_i \setminus \{X\}$. Let us
+the first summation over $\textbf{X}_i \setminus \{X\}$. 
+\\\\
+Let us
 take a step back and describe what exactly equation 
 \ref{eq:message_var_to_fact_der} is trying to tell us. The message
 of factor $f_i$ to variable $X$ is the product of all incoming
 messages $\mu_{X_{ij} \rightarrow f_i}$ and the factor $f_i$ itself.
 This product will result in a table, with an entry for each configuration
 of $\textbf{X}_i$. We then sum over all variables of this table
-except $X$. The message is then passed to $X$.
+except $X$. The message is then passed to $X$. In a sense, the message
+passed from factor node $f_i$ to variable node $X$ is the \textit{influence}
+of all the factors contained in the sub tree $G_i$. It is the \textit{belief}
+about the distribution coming from sub tree $G_i$. The marginal
+$p(X)$ is then simply the product of the \textit{beliefs}
+of all parts of the network.
+
+\begin{exmp}
+Let us try to get a bit more intuition behind the idea of the messages.
+Consider a very simple 4 node graph with variable nodes $X_1, X_2$ and
+$X$ and factor node $f$. For convenience let's consider the factor $f$ 
+as the following function:
+\begin{equation}
+f(X, X_1, X_2) = f_{Dec(XX_1X_2)}
+\end{equation} 
+
+\noindent 
+Figure \ref{fig:message_to_fact_exmp} shows what the message 
+$\mu_{f\rightarrow X}(X)$ from $f$ to $X$ looks like.
+
+\begin{figure}[h!]
+\centering
+
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[vn](X2) at (0,2){$X_2$};
+	\node[vn](X1) at (0,-2){$X_1$};
+	\node[vn](X) at (11,0){$X$};
+	
+	\node[vn](f) at (4, 0){$f$};
+	
+	\draw[-](X1) -- (f);
+	\draw[-](X2) -- (f);
+	\draw[-](X) -- (f);
+	
+	\draw[->,black, ultra thick, sloped, opacity=0.5, 
+			text = black, text opacity = 1, pos=0.45] (0.4, -1.65) -- 
+	node[above]{	
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X_1$ & $\mu_{X_1 \rightarrow f}$ \\
+		\hline
+		\rowcolor{cream} 0 & $\mu^1_0$\\
+		\rowcolor{a1} 1 & $\mu^1_1$\\
+		\hline
+		\end{tabular}	
+	} (3.5, -.08);
+	
+	
+	\draw[->,black, ultra thick, sloped, opacity=0.5, 
+			text = black, text opacity = 1, pos=0.45] (0.5, 2.0) -- 
+	node[above]{
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X_2$ & $\mu_{X_2 \rightarrow f}$ \\
+		\hline
+		\rowcolor{cream} 0 & $\mu^2_0$\\
+		\rowcolor{a1} 1 & $\mu^2_1$\\
+		\hline
+		\end{tabular}	
+	} (3.5, 0.47);
+	
+	\draw[->,black, ultra thick, sloped, opacity=0.5,
+			text = black, text opacity = 1, pos=0.75] (4.4, 0.2) -- 
+	node[above](n1){
+		\begin{tabular}{|l|l|}
+		\hline
+	 	\rowcolor{lightgray} $X$ & $\mu_{f \rightarrow X}$ \\
+		\hline
+		\rowcolor{cream} 0 & $m_0$\\
+		\rowcolor{a1} 1 & $m_1$\\
+		\hline
+		\end{tabular}	
+	} (10.7, 0.2);
+	
+	\node[](px) at (4, -3){
+	$f\prod \mu = $
+		\begin{tabular}{|lll|l|}
+		\hline
+		\rowcolor{lightgray} $X$ & $X_1$ & $X_2$ & $f\prod \mu$ \\
+		\hline
+		\rowcolor{cream} 0 & 0 & 0 & $f_0\mu_0^1\mu_0^2$ \\
+		\rowcolor{cream} 0 & 0 & 1 & $f_1\mu_0^1\mu_1^2$ \\
+		\rowcolor{cream} 0 & 1 & 0 & $f_2\mu_1^1\mu_0^2$ \\
+		\rowcolor{cream} 0 & 1 & 1 & $f_3\mu_1^1\mu_1^2$ \\
+		\rowcolor{a1}  1 & 0 & 0 & $f_4\mu_0^1\mu_0^2$ \\
+		\rowcolor{a1}  1 & 0 & 1 & $f_5\mu_0^1\mu_1^2$ \\
+		\rowcolor{a1}  1 & 1 & 0 & $f_6\mu_1^1\mu_0^2$ \\
+		\rowcolor{a1}  1 & 1 & 1 & $f_7\mu_1^1\mu_1^2$ \\
+		\hline
+		\end{tabular}
+	};
+	\node[](ccc) at (9.5, -3){
+		\begin{tabular}{|l|l|}
+		\hline
+		\rowcolor{lightgray} $X$ & $\sum_{X_1, X_2}$ \\
+		\hline
+		\rowcolor{cream} 0 & $m_0$ \\
+		\rowcolor{a1} 1 & $m_1$ \\
+		\hline
+		\end{tabular}
+	};
+	
+	\draw[->, dashed, ultra thick, red, opacity = 0.8, above,
+			text opacity = 1.0] (px) -- 
+		node[](summed){$\sum_{X_1, X_2}$} (ccc);
+	
+	\draw[->, dashed, ultra thick, red, opacity = 0.8, above,
+			text opacity = 1.0]
+		(ccc) -- (n1);
+	
+\end{tikzpicture}
+
+\caption{Example of message $\mu_{f \rightarrow X}$.}
+\label{fig:message_to_fact_exmp}
+\end{figure}
+\end{exmp}
+
+
+\subsection{Messages from variable $X_{ij}$ to factor $f_i$: 
+$\mu_{X_{ij} \rightarrow X_i}$}
+From equation \ref{eq:message_var_to_fact_der} we noticed that
+in order to compute the messages from a factor $f$ to a variable $X$, 
+we require all messages from all variables except $X$. Let us now consider
+how to compute the messages from variables $X_{ij}$ to factor $f_i$.
+The way we derive this will be very similar as the messages from
+factors to variables. Let us take another look at the message
+from equation \ref{eq:message_var_to_fact}:
+
+\begin{equation}\begin{split}
+\mu_{X_{ij} \rightarrow f_i}(X_{ij}) = \sum_{V_{ij} \setminus \{X_{ij}\}}
+			F_{ij}(X_{ij}, V_{ij})
+\end{split}\end{equation}
 
 
 \section{Approximate inference in Bayesian networks}
