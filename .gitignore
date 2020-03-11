@@ -2,6 +2,7 @@
 *.fls
 *.log
 *.gz
+*.dvi
 *.aux
 *.out
 *.toc

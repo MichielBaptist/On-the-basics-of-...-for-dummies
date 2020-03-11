@@ -2337,6 +2337,98 @@ from equation \ref{eq:message_var_to_fact}:
 			F_{ij}(X_{ij}, V_{ij})
 \end{split}\end{equation}
 
+\noindent
+Again we notice a very similar structure as in calculating the marginal
+probability in equation \ref{eq:factor_marg}. Indeed, consider again 
+the definition of $F_{ij}(X_{ij}, V_{ij})$ in equation \ref{eq:fij}.
+Plugging in we obtain:
+
+\begin{equation}\label{eq:mu_xij_to_fij}
+\mu_{X_{ij} \rightarrow f_i}(X_{ij}) = \sum_{V_{ij}\setminus \{X_ij\}}
+\prod_{f_k \in F_{ij}} f_k(\textbf{X}_k)
+\end{equation}
+
+\noindent
+Indeed, euation \ref{eq:mu_xij_to_fij} is nothing more than the 
+marginal probability of $X_{ij}$ in the sub tree graph $G_{ij}$
+as defined in the previous section. Thus, we can compute 
+$\mu_{X_{ij} \rightarrow f_i}$ in the exact same fashion as we did
+$p(X)$ in the first place! Let us again consider a partition of 
+$F_{ij}$ using sub graphs of $X_{ij}$ except the sub graph
+containing $f_i$. Graph $G_{ij}$ is partitioned as in figure
+\ref{fig:subtree_Xij}.
+
+\begin{figure}[h!]
+\centering
+
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[fn, label=right:{$f_i$}](X) at (0,0){};
+	\node[vn] (fi) at (0, -1){$X_{ij}$};
+	
+	\node[fn, label=right:{$f_{ij1}$}](Xi1) at (-1.6, -3) {};
+	\node[](dots1) at (0, -3) {$\dots$};
+	\node[fn, label=right:{$f_{ijk}$}](Xim) at (1.6, -3) {};
+	
+	\node[vn](fi11) at (-3, -5){$X_{ij1}^1$};
+	\node[] (dots2) at (-2, -5){$\dots$};
+	\node[vn](fi1k) at (-1, -5){$X_{ij1}^s$};
+	
+	\node[vn](fim1) at (1, -5){$X_{ijk}^1$};
+	\node[] (dots3) at (2, -5){$\dots$};
+	\node[vn](fimk2) at (3, -5){$X_{ijk}^{s'}$};
+	
+	\draw[-] (X) -- (fi);
+	\draw[-] (fi) -- (Xi1);
+	\draw[-] (fi) -- (Xim);
+	
+	\draw[-] (Xi1) -- (fi11);
+	\draw[-] (Xi1) -- (fi1k);
+	
+	\draw[-] (Xim) -- (fim1);
+	\draw[-] (Xim) -- (fimk2);
+	
+	\draw[rounded corners, ultra thick, gray] 
+		(0, -0.5) --
+		(0.8, -0.5) --
+		(4.3, -5) --
+		(4.3, -6) --
+		(-4.3, -6) --
+		(-4.3, -5) -- 
+		(-0.8, -0.5) --
+		(0, -0.5);
+	\node[text = gray](Gi) at (-0.8, -1){$G_{ij}$};
+	
+	\draw[rounded corners, ultra thick, blue, opacity=0.3] 
+		(-1.8, -2.4) --
+		++(0.8, 0) --
+		++(0.9, -3.3) --
+		++(-4, 0) --
+		++(0, 0.8) --
+		(-2.1, -2.4) --
+		(-1.8, -2.4);
+	\node[text = blue, opacity = 0.3](Gi1) at (-2.3, -3.5){$G_{ij1}$};
+	
+	\draw[rounded corners, ultra thick, blue, opacity=0.3] 
+		(1.8, -2.4) --
+		++(-0.8, 0) --
+		++(-0.9, -3.3) --
+		++(4, 0) --
+		++(0, 0.8) --
+		(2.1, -2.4) --
+		(1.8, -2.4);
+	\node[text = blue, opacity = 0.3](Gi1) at (2.4, -3.5){$G_{ijk}$};
+	
+\end{tikzpicture}
+
+\caption{Recursively partitioning of $G_{ij}$.}
+\label{fig:subtree_Xij}
+\end{figure}
+
 
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
