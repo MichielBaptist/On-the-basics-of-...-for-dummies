@@ -2135,8 +2135,14 @@ shows the recursive partitioning of $F_i\setminus \{X\}$ in $G_i$.
 The result is the partition of the factors according to the
 sub graphs of $f_i$ without considering the sub graph containing $X$,
 $S_{G_i}(f_i) = \{G_{i1}, \dots, G_{im}\}$. Where each sub graph is
-defined as $G_{ij} = (V_{i,j} \cup F_{ij}, E_{i,j})$, and it 
-again holds that:
+defined as:
+
+\begin{equation}
+G_{ij} = (V_{i,j} \cup F_{ij}, E_{i,j})
+\end{equation}
+
+\noindent
+It again holds that:
 
 \begin{multicols}{2}
 \begin{equation}
@@ -2160,7 +2166,7 @@ We continue our derivation of the messages from equation
 \ref{eq:message_decomp} using equation \ref{eq:fij}:
 
 \begin{equation}\label{eq:message_var_to_fact_der}\begin{split}
-\mu_{f_i \rightarrow X} 
+\mu_{f_i \rightarrow X} (X)
 	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
 		\prod_{f_j \in F_i \setminus \{f_i\}} f_j(\textbf{X}_j)\\
 	&= \sum_{V_i}f_i(X, \textbf{X}_i \setminus \{X\}) 
@@ -2332,7 +2338,7 @@ The way we derive this will be very similar as the messages from
 factors to variables. Let us take another look at the message
 from equation \ref{eq:message_var_to_fact}:
 
-\begin{equation}\begin{split}
+\begin{equation}\label{eq:message_var_to_fact_}\begin{split}
 \mu_{X_{ij} \rightarrow f_i}(X_{ij}) = \sum_{V_{ij} \setminus \{X_{ij}\}}
 			F_{ij}(X_{ij}, V_{ij})
 \end{split}\end{equation}
@@ -2429,6 +2435,204 @@ containing $f_i$. Graph $G_{ij}$ is partitioned as in figure
 \label{fig:subtree_Xij}
 \end{figure}
 
+\noindent
+The resulting partition is then again decided according to the sub
+graphs $S_{G_{ij}}(X_{ij}) = \{G_{ij1}, \dots, G_{ijk}\}$. Where each
+sub graph $G_{ijk}$ is defined as:
+
+\begin{equation}\begin{split}
+G_{ijk} = (F_{ijk} \cup V_{ijk}, E_{ijk})
+\end{split}\end{equation}
+
+\noindent
+It again holds that:
+
+\begin{multicols}{2}
+\begin{equation}
+\bigcup_{G_{ijk} \in S_{G_{ij}}(X_{ij})} F_{ijk} = F_{ij}
+\end{equation}
+\break
+\begin{equation}
+\bigcap_{G_{ijk} \in S_{G_{ij}}(X_{ij})} F_{ijk} = \emptyset
+\end{equation}
+\end{multicols}
+
+\noindent
+We again define $F_{ijk}(X_{ijk}, V_{ijk})$ as the product of 
+all factors in $F_{ijk}$ in sub graph $G_{ijk}$:
+
+\begin{equation}
+F_{ijk}(X_{ij}, V_{ijk}) = \prod_{f_l \in F_{ijk}} f_l(\textbf{X}_l)
+\end{equation}
+
+\noindent
+Just as we've done for the messages from factor nodes to variable
+nodes, we use this partition of $F_{ijk}$ in conjunction with equation
+\ref{eq:message_var_to_fact_}:
+
+\begin{equation}\begin{split}
+\mu_{X_{ij} \rightarrow f_i}(X_{ij}) 
+	&= \sum_{V_{ij} \setminus \{X_{ij}\}}F_{ij}(X_{ij}, V_{ij}) \\
+	&= \sum_{V_{ij} \setminus \{X_{ij}\}} 
+		\prod_{G_{ijk} \in S_{G_{ij}}(X_{ij})} F_{ijk}(X_{ij}, V_{ijk}) \\
+	&=  \prod_{G_{ijk} \in S_{G_{ij}}(X_{ij})} 
+		\sum_{V_{ijk} }F_{ijk}(X_{ij}, V_{ijk}) \\
+	&= \prod_{G_{ijk} \in S_{G_{ij}}(X_{ij})} 
+		\mu_{f_{ijk}\rightarrow X_{ij}}(X_{ij})\\
+\end{split}\end{equation}
+
+\noindent
+Here we define $\mu_{f_{ijk} \rightarrow X_{ij}}(X_{ij})$ as the
+message from factor $f_{ijk}$ to variable node $X_{ij}$:
+
+\begin{equation}
+\mu_{f_{ijk} \rightarrow X_{ij}}(X_{ij}) 
+	= \sum_{V_{ijk} }F_{ijk}(X_{ij}, V_{ijk})
+\end{equation}
+
+\noindent
+The above result is quite elegant and satisfying. It states that
+the message from variable node $X_{ij}$ to factor node $f_i$ is
+nothing more than the product of all incoming messages, except the
+message from fractor node $f_i$ itself. This is identical to the 
+marginal probability whith which we started, with the exception
+that the message from $f_i$ is not considered.
+However, one can look at the message
+$\mu_{X_{ij} \rightarrow f_i}$ as the marginal probability of variable
+node $X_{ij}$ given that it only knows the local information of its sub
+graph $G_{ij}$. In a sense, variable node $X_{ij}$ is conveying its
+local \textit{belief} about its marginal distribution to factor node
+$f_i$. This factor node then compiles all local beliefs of all 
+variable nodes and adjusts the distribution according to its own
+factor $f_i(\textbf{X}_i)$.
+
+\subsection{Base case of message passing}
+Thus we have derived that:
+
+\begin{enumerate}
+\item The marginal probability $p(X)$ is simply the product of
+all incoming messages from factor nodes:
+\begin{multicols}{2}
+\begin{equation}
+p(X) = \prod_{f_i \in N(X)} \mu_{f_i \rightarrow X}(X)
+\end{equation}
+\break
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[fn, label=above:{$f_1$}] (f1) at (0, 0.5){};
+	\node[fn, label=above:{$f_2$}] (f2) at (0, -0.5){};
+	\node[fn, label=above:{$f_3$}] (f3) at (4, 0){};
+	
+	\node[vn] (X) at (2, 0){$X$};
+	
+	\draw[ultra thick, green, ->] (f1) -- node[above]{$\mu_1$}(X);
+	\draw[ultra thick, green, ->] (f2) -- node[above]{$\mu_2$}(X);
+	\draw[ultra thick, green, ->] (f3) -- node[above]{$\mu_3$}(X);
+	
+	\path (X) edge [blue, ultra thick,loop above, opacity = 0.7] 
+			node{$\prod \mu_i$} (X);
+	
+\end{tikzpicture}
+\end{multicols}
+
+\item The messages from factor node $f_i$ to variable $X$ is simply
+the product of all incoming message and the factor $f_i(\textbf{X}_i)$:
+\begin{multicols}{2}
+\begin{equation}\begin{split}
+\mu_{f_i \rightarrow X}(X) = f_i(\textbf{X}_i) * \\
+	\prod_{\substack{X_j \in N(f_i) \\ X_j \neq X}} 
+	\mu_{X_j \rightarrow f_i}(X_j)
+\end{split}\end{equation}
+\break
+\hspace{4em}
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[vn] (1) at (0, 0.5){$X_1$};
+	\node[vn] (2) at (0, -0.5){$X_2$};
+	\node[vn] (X) at (4, 0){$X$};
+	
+	\node[fn, label=below:{$f_i$}] (f) at (2, 0){};
+	
+	\draw[ultra thick, green, ->] (1) -- node[above]{$\mu_1$}(f);
+	\draw[ultra thick, green, ->] (2) -- node[above]{$\mu_2$}(f);
+	\draw[ultra thick, red, ->, opacity =0.7] (f) -- node[above]{$\mu(X)$}(X);
+	
+	\path (f) edge [blue, ultra thick,loop above, opacity = 0.7] 
+			node{$f\prod \mu_i$} (f);
+	
+\end{tikzpicture}
+\end{multicols}
+
+\item The messages from variable node $X_i$ to factor node $f$ is simply
+the product of all incoming messages:
+\begin{multicols}{2}
+\begin{equation}
+\mu_{X_i \rightarrow f}(X_i) = 
+	\prod_{\substack{f_j \in N(X_i) \\ f_j \neq f}} 
+	\mu_{f_j \rightarrow X_i}(X_j)
+\end{equation}
+\break
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[fn, label=above:{$f_1$}] (f1) at (0, 0.5){};
+	\node[fn, label=above:{$f_2$}] (f2) at (0, -0.5){};
+	\node[fn, label=above:{$f$}] (f) at (4, 0){};
+	
+	\node[vn] (X) at (2, 0){$X$};
+	
+	\draw[ultra thick, green, ->] (f1) -- node[above]{$\mu_1$}(X);
+	\draw[ultra thick, green, ->] (f2) -- node[above]{$\mu_2$}(X);
+	\draw[ultra thick, red, ->, opacity = 0.7] (X) -- node[above]{$\mu(X)$}(f);
+	
+	\path (X) edge [blue, ultra thick,loop above, opacity = 0.7] 
+			node{$\prod \mu_i$} (X);
+	
+\end{tikzpicture}
+\end{multicols}
+
+\end{enumerate}
+
+\noindent
+As our derivation of these messages was based on recursively 
+partitionion all the factors in the sub graph, this recursion 
+clearly must come to an end. Indeed consider a message 
+sent from a factor node $f_i$ to a variable 
+node $X$, however $f_i$ has no other connections except fom $X$.
+This situation is depicted in figure \ref{fig:message_base_case_1}.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[fn, label=above:{$f$}] (f) at (0,0){};
+	\node[vn] (X) at (3,0){$X$};
+	
+	\draw[-] (X) -- (f);
+	\draw[->, ultra thick, blue, opacity = 0.8] (0.3, 0.3) 
+	-- node[above]{$\mu_{f \rightarrow X} = f(X)$} (2.5, 0.3);
+\end{tikzpicture}
+\caption{First base case. A message is sent from factor node $f$
+to $X$, where $f$ only has $X$ as neighbour. I.e. $N(f) = \{X\}$.}
+\label{fig:message_base_case_1}
+\end{figure}
+
+\noindent
 
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
