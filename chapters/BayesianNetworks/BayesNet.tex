@@ -2181,7 +2181,7 @@ We continue our derivation of the messages from equation
 		\prod_{G_{ij} \in S_{G_i}(f_i)} \sum_{V_{ij} \setminus \{X_{ij}\}}
 			F_{ij}(X_{ij}, V_{ij})\\
 	&= \sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
-		\prod_{G_{ij} \in S_{G_i}(f_i)} \mu_{X_{ij} \rightarrow f_i}(X_{ij})
+		\prod_{X_{ij} \in N(f_i)} \mu_{X_{ij} \rightarrow f_i}(X_{ij})
 \end{split}\end{equation}
 
 \noindent
@@ -2620,19 +2620,29 @@ This situation is depicted in figure \ref{fig:message_base_case_1}.
 	fn/.style={draw = red, fill = red, shape = rectangle}
 	]
 	
-	\node[fn, label=above:{$f$}] (f) at (0,0){};
+	\node[fn, label=above:{$f_i$}] (f) at (0,0){};
 	\node[vn] (X) at (3,0){$X$};
 	
 	\draw[-] (X) -- (f);
 	\draw[->, ultra thick, blue, opacity = 0.8] (0.3, 0.3) 
-	-- node[above]{$\mu_{f \rightarrow X} = f(X)$} (2.5, 0.3);
+	-- node[above]{$\mu_{f_i \rightarrow X} = f_i(X)$} (2.5, 0.3);
 \end{tikzpicture}
-\caption{First base case. A message is sent from factor node $f$
-to $X$, where $f$ only has $X$ as neighbour. I.e. $N(f) = \{X\}$.}
+\caption{First base case. A message is sent from factor node $f_i$
+to $X$, where $f_i$ only has $X$ as neighbour. I.e. $N(f_i) = \{X\}$.}
 \label{fig:message_base_case_1}
 \end{figure}
 
 \noindent
+Indeed, let's consider again the mathematical definition 
+of $\mu_{f_i \rightarrow X}(X)$ from equation \ref{eq:message_var_to_fact_der}:
 
+\begin{equation}\begin{split}
+\mu_{f_i \rightarrow X}(X) 
+	&=\sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
+	\prod_{X_{ij} \in N(f_i)} \mu_{X_{ij} \rightarrow f_i}(X_{ij})\\
+	&= f_i(X)\\
+\end{split}\end{equation}
+
+The message in this base case is simply the factor $f$ itself.
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
