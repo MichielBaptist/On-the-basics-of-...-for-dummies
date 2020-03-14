@@ -2626,6 +2626,15 @@ This situation is depicted in figure \ref{fig:message_base_case_1}.
 	\draw[-] (X) -- (f);
 	\draw[->, ultra thick, blue, opacity = 0.8] (0.3, 0.3) 
 	-- node[above]{$\mu_{f_i \rightarrow X} = f_i(X)$} (2.5, 0.3);
+	
+	\draw[dotted, ultra thick, red , opacity=0.6] (3.5, -1) ..
+		controls (2,-0.5) and (2, 0.5) ..
+		(3.5, 1);
+		
+	\draw[-] (X) -- (3.5, 0.5);
+	\node[] (dd) at (3.5, 0){$\vdots$};
+	\draw[-] (X) -- (3.5, -0.5);
+		
 \end{tikzpicture}
 \caption{First base case. A message is sent from factor node $f_i$
 to $X$, where $f_i$ only has $X$ as neighbour. I.e. $N(f_i) = \{X\}$.}
@@ -2640,9 +2649,87 @@ of $\mu_{f_i \rightarrow X}(X)$ from equation \ref{eq:message_var_to_fact_der}:
 \mu_{f_i \rightarrow X}(X) 
 	&=\sum_{\textbf{X}_i\setminus \{X\}} f_i(X, \textbf{X}_i \setminus \{X\}) 
 	\prod_{X_{ij} \in N(f_i)} \mu_{X_{ij} \rightarrow f_i}(X_{ij})\\
+	&= f_i(X)\prod_{X_{ij} \in \emptyset}\mu_{X_{ij} \rightarrow f_i}(X_{ij})\\
 	&= f_i(X)\\
 \end{split}\end{equation}
 
-The message in this base case is simply the factor $f$ itself.
+\noindent
+The message in this base case is simply the factor $f$ itself. Consider 
+for example a prior in a Bayesian network. When converting the Bayesian
+network to a factor graph, priors will be encoded as this base case.
+Thus, the message conveys the local \textit{belief} of $f_i$ about
+the variable $X$.
+\\\\
+Consider now the opposite of the previous situation. Where we
+look at a message from a variable node $X_i$ to a factor node 
+$f$. This time, however, $X_i$ has no other neighbours except for
+$f$ itself. This situation is depicted in figure 
+\ref{fig:message_base_case_2}.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+	[
+	vn/.style={draw = black, shape = circle},
+	fn/.style={draw = red, fill = red, shape = rectangle}
+	]
+	
+	\node[vn] (X) at (0,0){$X_i$};
+	\node[fn, label=above:{$f$}] (f) at (3,0){};
+	
+	\draw[-] (X) -- (f);
+	\draw[->, ultra thick, blue, opacity = 0.8] (0.5, 0.3) 
+	-- node[above]{$\mu_{X_i \rightarrow f} = 1$} (2.7, 0.3);
+	
+	\draw[dotted, ultra thick, red , opacity=0.6] (3.5, -1) ..
+	controls (2,-0.5) and (2, 0.5) ..
+	(3.5, 1);
+		
+	\draw[-] (f) -- (3.5, 0.5);
+	\node[] (dd) at (3.5, 0){$\vdots$};
+	\draw[-] (f) -- (3.5, -0.5);
+\end{tikzpicture}
+\caption{Second base case. A message is sent from variable node $X_i$
+to $f$, where $X_i$ only has $f$ as neighbour. I.e. $N(X_i) = \{f\}$.}
+\label{fig:message_base_case_2}
+\end{figure}
+
+\noindent
+From the definition of messages from variables to factors in
+equation \ref{eq:mu_xij_to_fij}, we find:
+
+\begin{equation}\begin{split}
+\mu_{X_i \rightarrow f}(X_i)
+	&= \sum_{\textbf{X}\setminus \{X_i\}} 
+		\prod_{f_j \in N(X_i)} \mu_{f_j \rightarrow X_i}(X_i) \\
+	&= \prod_{f_j \in \emptyset} \mu_{f_j \rightarrow X_i}(X_i) \\
+	&= 1 \\
+\end{split}\end{equation}
+
+\noindent
+The message in this base case is simply non informative. A variable node
+on its own does not contain any information and thus does not
+convey usefull information about its \textit{belief} about its
+distribution.
+
+\subsection{The complete overview}
+We've seen that we can compute the marginal of $p(X)$ of any 
+variable $X$ in terms of messages from all the nodes in a factor
+graph. Assume we want to find the marginal probability of all
+variable nodes in the graph. We could for instand do this 
+by computing the marginal for each variable seperately.
+However, this would result in a quadratic time complexity
+in terms of the amount of variables in the bayesian network.
+Indeed, consider figure \ref{fig:sum_prod_innef}. Here we compute
+the marginal of two variable nodes $A$ and $B$. We notice that
+all the messages in the sub trees $G_A$ and $G_B$ have to be computed
+twice.
+
+\begin{figure}[h!]
+\centering
+
+\caption{Example of redundant computation whith na\"ive algorithm.}
+\label{fig:sum_prod_innef}
+\end{figure}
 \section{Approximate inference in Bayesian networks}
 \subsection{Sampling methods}
